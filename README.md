@@ -154,7 +154,7 @@ the time elapsed from when the client first starts sending data to
 when it receives an ackonlowedgement (graceful close of connection)
 message from the server.
 
-**Running client with -i flag** 
+#### Running client with -i flag 
 
 When simpleperf is invoked in client mode
 with -i flag, it will then print statistics per t seconds specified after the -i flag.
@@ -179,7 +179,8 @@ Client connected with server_IP port XXXX
 | --------- | ------------- | -------  | ---------- |
 | IP:port   | 0.0 - 25.0    | X MB     | Y Mbps     |
 
-**Running client with -n or --num flag** 
+#### Running client with -n or --num flag
+
 When simpleperf is invoked in client mode with -n flag, it will transfer the amount of bytes specified by -n and display the statistics
 
 Here is an example:
@@ -190,7 +191,8 @@ The client will establish a TCP connection with the simpleperf server and send
 10MB data in chunks of 1000 bytes. Simpleperf will calculate and display the
 bandwidth.
 
-**Running client with -P or --parallel flag**
+#### Running client with -P or --parallel flag
+
 The client will establish parallel TCP connection with the simpleperf server and send data in chunks of 1000 bytes for 100 seconds (specified with -t flag). At the end of the transfer,
 Simpleperf client will calculate and display the bandwidth.
 
