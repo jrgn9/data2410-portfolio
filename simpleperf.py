@@ -108,7 +108,7 @@ def check_port(val):
     if (value<=0):
         print('it is not a valid port')
         sys.exit()
-    return value
+    return value 
     '''
     pass
 
