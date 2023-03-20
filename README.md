@@ -47,14 +47,14 @@ Here is an example how one should be able to invoke the server:
 And the server should print the following and wait for a connection:
 ```
 ---------------------------------------------
-    A simpleperf server is listening on port XXXX
+A simpleperf server is listening on port XXXX
 ---------------------------------------------
 ```
 
 When a client connects, a server should print:
 ```
 ---------------------------------------------
-    A simpleperf server is listening on port XXXX
+A simpleperf server is listening on port XXXX
 ---------------------------------------------
 ```
 
@@ -121,9 +121,9 @@ data; the port should be in the range [1024, 65535]
 and sent to the server.
 
 ```
-------------------------------------------------------------------------------------------
+---------------------------------------------------------
 A simpleperf client connecting to server <IP>, port XXXX
-------------------------------------------------------------------------------------------
+---------------------------------------------------------
 
 Client connected with server_IP port XXXX
 ```
@@ -163,9 +163,9 @@ Here is an example:
 ```
 python3 simpleperf -c -I <server_ip> -p <server_port> -t <time> -i 5
 
-------------------------------------------------------------------------------------------
+---------------------------------------------------------
 A simpleperf client connecting to server <IP>, port XXXX
-------------------------------------------------------------------------------------------
+---------------------------------------------------------
 Client connected with server_IP port XXXX
 ```
 
@@ -200,9 +200,9 @@ Here is an example where the client will open two TCP connections in parallel to
 
 ```
 python3 simpleperf -c -I <server_ip> -p <server_port> -P 2 -t 100
-------------------------------------------------------------------------------------------
+---------------------------------------------------------
 A simpleperf client connecting to server <IP>, port XXXX
-------------------------------------------------------------------------------------------
+---------------------------------------------------------
 Client IP:port connected with server_IP port XXXX
 Client IP: port connected with server_IP port XXXX
 ```
