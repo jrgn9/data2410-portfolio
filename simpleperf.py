@@ -106,7 +106,7 @@ def check_port(val):
     except ValueError:
         raise argparse.ArgumentTypeError('expected an integer but you entered a string')
     if (value<=0):
-        print('it is not a valid port')
+        print('it is not a valid port') 
         sys.exit()
     return value 
     '''
