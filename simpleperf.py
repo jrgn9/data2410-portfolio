@@ -58,7 +58,7 @@ parser.add_argument(
 parser.add_argument(
     '-n', '--num',
     type=check_num,
-    help='transfer number of bytes specified by -n flag, it should be either in B, KB or MB')
+    help='transfer number of bytes specified by -n flag, it should be either in B, KB or MB. e.g. 1MB')
 
 # COMMON ARGUMENTS:
 parser.add_argument(
@@ -76,18 +76,26 @@ parser.add_argument(
 # FUNCTIONS TO CHECK INPUT VALUES
 
 def check_mode(mode):
+    # if -s - return server
+    # if -c - return client
+    # else - error message
     pass
 
-def check_ip(ip_adress):
+def check_ip(ip_address):
     # Use ipaddress import
+    # ipaddress.ip_address(ip_address)
+    # except ValueError:
+    # See Safiquls code
     pass
 
 def check_port(port):
-    # Use ipaddress import - See Safiquls code
+    # check for int, then check for value >= 1024, <= 65535 
     pass
 
 def check_positive(num):
+    # Check that it is a int and a positive number
     pass
 
 def check_num(bytes):
+    # split, then check for int and B, KB, MB
     pass
