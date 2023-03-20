@@ -113,7 +113,7 @@ def check_port(val):
     pass
 
 def check_positive(num):
-    # Check that it is a int and a positive number
+    # Check that it is a int and a positive number 
     pass
 
 def check_num(bytes):
