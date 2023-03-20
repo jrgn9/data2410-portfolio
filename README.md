@@ -71,22 +71,29 @@ A simpleperf server is listening on port XXXX
 A simpleperf client with <IP address: port> is connected with <server IP:port>
 ```
 
-|**ID**     | **Interval**  | **Received**   | **Rate** |
-|-------------------------------------------------------|
-| IP:port   | 0.0 - 25.0    |   X MB         |Y Mbps    |
+| ID      | Interval   | Recieved | Rate   |
+|---------|------------|----------|--------|
+| IP:port | 0.0 - 25.0 | X MB     | Y Mbps |
 
-There are four columns here:
+**There are four columns here:**
 
 1. ID specifies the client_IP:port pair
+   
 2. Interval: Total duration in seconds
+   
 3. Transfer: X stands for the total number of bytes received (in Megabytes,
 if not specified with -f. Note X should be an integer.
+
 4. Rate: Y stands for the rate at which traffic could be read in megabits per
 second (Mbps). and Y should be a float value with two digits after the
 decimal point.
-ID Interval Received Rate
-10.0.0.1:3354 0.0 - 25.0 2544 KB 0.82 Mbps
-Client mode
+
+| ID            | Interval   | Recieved | Rate      |
+|---------------|------------|----------|-----------|
+| 10.0.0.1:3354 | 0.0 - 25.0 | 2544 KB  | 0.82 Mbps |
+
+### Client mode
+
 When we invoke simpleperf in a client mode, it must establish a TCP connec-
 tion with the simpleperf server and send data in chunks of 1000 bytes (all zeroes
 or same values) for t seconds specified with -t or –time flag. Calculate the total
@@ -94,156 +101,110 @@ of the number of bytes sent. After the client finishes sending its data, it shou
 send a finish/bye message and wait for an acknowledgement before exiting the
 program. Simpleperf will calculate and display the bandwidth based on how
 much data was sent in the elapsed time.
-To operate simpleperf in client mode, it should be invoked as follows:
-python3 simpleperf -c -I <server_ip> -p <server_port> -t <time>
-• -c indicates this is the simpleperf client mode.
-• -I specifies the server_ip - IP address of the simpleperf server will
+
+**To operate simpleperf in client mode, it should be invoked as follows:**
+
+    python3 simpleperf -c -I <server_ip> -p <server_port> -t <time>
+
+* -c indicates this is the simpleperf client mode.
+  
+* -I specifies the server_ip - IP address of the simpleperf server will
 receive data from the simpleperf client
-• -p specifies the server_port in which the server is listening to receive
+
+* -p specifies the server_port in which the server is listening to receive
 data; the port should be in the range [1024, 65535]
-• time is the total duration in seconds for which data should be generated
+
+* time is the total duration in seconds for which data should be generated
 and sent to the server.
+
+```
 ------------------------------------------------------------------------------------------
 A simpleperf client connecting to server <IP>, port XXXX
 ------------------------------------------------------------------------------------------
+
 Client connected with server_IP port XXXX
-ID Interval Transfer Bandwidth
-IP:port 0.0 - 25.0 X MB Y Mbps
-Table below lists all the available options that you can use to invoke the server:
-4
-flag long flag input type Description
--c --client X (boolean) enable the
-client mode
--I --serverip ip address string selects the
-ip address
-of the server
-- use a
-default value
-if it’s not
-provided. It
-must be in
-the dotted
-decimal
-notation
-format,
-e.g. 10.0.0.2
--p --port port num integer allows to
-select the
-server’s
-port
-number on ;
-the port
-must be an
-integer and
-in the range
-[1024,
-65535],
-default:
-8088
-5
-flag long flag input type Description
--t --time seconds integer the total
-duration in
-seconds for
-which data
-should be
-generated,
-also sent to
-the server (if
-it is set with
--t flag at the
-client side)
-and must be
-> 0. NOTE
-If you do
-not use -t
-flag, your
-experiment
-should run
-for 25
-seconds
--f --format MB string allows you
-to choose
-the format
-of the
-summary of
-results - it
-should be
-either in B,
-KB or MB,
-default=MB
-)
--i --interval z integer print
-statistics per
-z second
-6
-flag long flag input type Description
--P --parallel no_of_conn integer creates
-parallel
-connections
-to connect
-to the server
-and send
-data - it
-must be 1
-and the max
-value should
-be 5 -
-default:1
--n --num no_of_bytes string transfer
-number of
-bytes
-specfied by
--n flag, it
-should be
-either in B,
-KB or MB
+```
+
+| ID      | Interval   | Transfer | Bandwith |
+|---------|------------|----------|----------|
+| IP:port | 0.0 - 25.0 | X MB     | Y Mbps   |
+
+**Table below lists all the available options that you can use to invoke the server:**
+
+| flag | long flag  | input       | type      | description                                                                                                                                                                                                                          |
+|------|------------|-------------|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -c   | --client   | X           | (boolean) | enable the client mode                                                                                                                                                                                                               |
+| -I   | --serverip | ip adress   | string    | allows to select the ip address of the server - use a default value if it’s not provided. It must be in the dotted decimal notation format, e.g. 10.0.0.2                                                                            |
+| -p   | --port     | port number | integer   | allows to use select port number on which the server should listen; the port must be an integer and in the range [1024, 65535], default: 8088                                                                                        |
+| -t   | --time     | seconds     | integer   | the total duration in seconds for which data should be generated, also sent to the server (if it is set with -t flag at the client side) and must be > 0. NOTE: If you do not use -t flag, your experiment should run for 25 seconds |
+| -f   | --format   | MB          | string    | allows you to choose the format of the summary of results - it should be either in B, KB or MB, default=MB)                                                                                                                          |
+| -i   | --interval | z           | integer   | print statistics per z second                                                                                                                                                                                                        |
+| -P   | --parallel | no_of_conn  | integer   | creates parallel connections to connect to the server and send data - it must be 1 and the max value should be 5 - default:1                                                                                                         |
+| -n   | --num      | no_of_bytes | string    | transfer number of bytes specfied by -n flag, it should be either in B, KB or MB                                                                                                                                                     |
+
 If -c or -s flags are not specfied - you should print the following and exit:
-Error: you must run either in server or client mode
-NOTE: When calculating the rate for the overall duration, measure
+
+    Error: you must run either in server or client mode
+
+**NOTE:** When calculating the rate for the overall duration, measure
 the time elapsed from when the client first starts sending data to
 when it receives an ackonlowedgement (graceful close of connection)
 message from the server.
-Running client with -i flag When simpleperf is invoked in client mode
+
+**Running client with -i flag** 
+
+When simpleperf is invoked in client mode
 with -i flag, it will then print statistics per t seconds specified after the -i flag.
+
 Here is an example:
-python3 simpleperf -c -I <server_ip> -p <server_port> -t <time>
--i 5
+```
+python3 simpleperf -c -I <server_ip> -p <server_port> -t <time> -i 5
+
 ------------------------------------------------------------------------------------------
 A simpleperf client connecting to server <IP>, port XXXX
 ------------------------------------------------------------------------------------------
 Client connected with server_IP port XXXX
-ID Interval Transfer Bandwidth
-7
-IP:port 0.0 - 5.0 X MB Y Mbps
-IP:port 6.0 - 10.0 X MB Y Mbps
-IP:port 11.0 - 15.0 X MB Y Mbps
-IP:port 16.0 - 20.0 X MB Y Mbps
-IP:port 21.0 - 25.0 X MB Y Mbps
-----------------------------------------------------
-IP:port 0.0 - 25.0 X MB Y Mbps
-Running client with -n or --num flag When simpleperf is invoked in client
-mode with -n flag, it will transfer the amount of bytes specified by -n and display
-the statistics
+```
+
+| ID        | Interval      | Transfer | Bandwith   |
+|-----------|---------------|----------|------------|
+| IP:port   | 0.0 - 5.0     | X MB     | Y Mbps     |
+| IP:port   | 6.0 - 10.0    | X MB     | Y Mbps     |
+| IP:port   | 11.0 - 15.0   | X MB     | Y Mbps     |
+| IP:port   | 16.0 - 20.0   | X MB     | Y Mbps     |
+| IP:port   | 21.0 - 25.0   | X MB     | Y Mbps     |
+| --------- | ------------- | -------  | ---------- |
+| IP:port   | 0.0 - 25.0    | X MB     | Y Mbps     |
+
+**Running client with -n or --num flag** 
+When simpleperf is invoked in client mode with -n flag, it will transfer the amount of bytes specified by -n and display the statistics
+
 Here is an example:
-python3 simpleperf -c -I <server_ip> -p <server_port> -n 10M
+
+    python3 simpleperf -c -I <server_ip> -p <server_port> -n 10M
+
 The client will establish a TCP connection with the simpleperf server and send
 10MB data in chunks of 1000 bytes. Simpleperf will calculate and display the
 bandwidth.
-Running client with -P or --parallel flag The client will establish par-
-allel TCP connection with the simpleperf server and send data in chunks of
-1000 bytes for 100 seconds (specified with -t flag). At the end of the transfer,
+
+**Running client with -P or --parallel flag**
+The client will establish parallel TCP connection with the simpleperf server and send data in chunks of 1000 bytes for 100 seconds (specified with -t flag). At the end of the transfer,
 Simpleperf client will calculate and display the bandwidth.
-Here is an example where the client will open two TCP connections in parallel
-to connect with the server.
+
+Here is an example where the client will open two TCP connections in parallel to connect with the server.
+
+```
 python3 simpleperf -c -I <server_ip> -p <server_port> -P 2 -t 100
 ------------------------------------------------------------------------------------------
 A simpleperf client connecting to server <IP>, port XXXX
 ------------------------------------------------------------------------------------------
 Client IP:port connected with server_IP port XXXX
 Client IP: port connected with server_IP port XXXX
-ID Interval Transfer Bandwidth
-IP:port 0.0 - 25.0 X MB Y Mbps
-IP:port 0.0 - 25.0 X MB Y Mbps
-NOTE: the arguments must not be positional arguments, i.e., users
+```
+| ID        | Interval      | Transfer | Bandwith   |
+|-----------|---------------|----------|------------|
+| IP:port   | 0.0 - 25.0    | X MB     | Y Mbps     |
+| IP:port   | 6.0 - 25.0    | X MB     | Y Mbps     |
+
+**NOTE:** the arguments must not be positional arguments, i.e., users
 do not need to remember the position of the argu
