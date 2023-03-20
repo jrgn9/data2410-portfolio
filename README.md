@@ -12,6 +12,8 @@ You’ll implement a simple network throughput measurement tool - simpleperf. Yo
 and 
 2) Client mode
 
+---------------------------------------------
+
 ### Server mode
 When you run in server mode, simpleperf will receive TCP packets and track how much data was received during from the connected clients; it will calculate and display the bandwidth based on how much data was received and how much time elapsed during the connection. A server should read data in chunks of 1000 bytes. For the sake of simplcity, assume 1 KB = 1000 Bytes, and 1 MB = 1000KB.
 
@@ -92,6 +94,7 @@ decimal point.
 |---------------|------------|----------|-----------|
 | 10.0.0.1:3354 | 0.0 - 25.0 | 2544 KB  | 0.82 Mbps |
 
+-------------------------------------------------------
 ### Client mode
 
 When we invoke simpleperf in a client mode, it must establish a TCP connec-
@@ -207,4 +210,4 @@ Client IP: port connected with server_IP port XXXX
 | IP:port   | 6.0 - 25.0    | X MB     | Y Mbps     |
 
 **NOTE:** the arguments must not be positional arguments, i.e., users
-do not need to remember the position of the argu
+do not need to remember the position of the arguments.
