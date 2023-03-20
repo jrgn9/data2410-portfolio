@@ -86,10 +86,30 @@ def check_ip(ip_address):
     # ipaddress.ip_address(ip_address)
     # except ValueError:
     # See Safiquls code
+
+    '''
+try:
+       val = ipaddress.ip_address(address)
+       print(f"The IP address {val} is valid.")
+    except ValueError:
+       print(f"The IP address is {address} not valid")
+    '''
     pass
 
 def check_port(port):
     # check for int, then check for value >= 1024, <= 65535 
+
+    '''
+def check_port(val):
+    try:
+        value = int(val)
+    except ValueError:
+        raise argparse.ArgumentTypeError('expected an integer but you entered a string')
+    if (value<=0):
+        print('it is not a valid port')
+        sys.exit()
+    return value
+    '''
     pass
 
 def check_positive(num):
