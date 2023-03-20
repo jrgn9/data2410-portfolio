@@ -23,33 +23,35 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     '-s', '--server',
     type=bool, 
-    required=True, 
-    help='enable the server mode')
+    help='enable the server mode. Choosing server or client mode are required.')
 parser.add_argument(
     '-b', '--bind',
-    const=server_ip,
+    type=int,
     default='127.0.0.1',
     help='allows to select the ip address of the servers interface where the client should connect. It must be in the dotted decimal notation format, e.g. 10.0.0.2')
-parser.add_argument(
-    '-p', '--port',
-    type=int,
-    choices=range(1024, 65535),
-    default=8088,
-    help='allows to use select port number on which the server should listen; the port must be an integer and in the range [1024, 65535], default: 8088')
-parser.add_argument(
-    'f', '--format',
-    choices=['B', 'KB', 'MB'],
-    default='MB',
-    help='allows you to choose the format of the summary of results - it should be either in B, KB or MB, default=MB)')
 
 # CLIENT ARGUMENTS:
-parser.add_argument('-c', '--client', type=bool, required=True, help='enable the client mode')
+parser.add_argument(
+    '-c', '--client', 
+    type=bool,
+    help='enable the client mode. Choosing server or client mode are required.')
 parser.add_argument('-I', '--serverip')
-parser.add_argument('-p', '--port')
 parser.add_argument('-t', '--time')
-parser.add_argument('-f', '--format')
 parser.add_argument('-i', '--interval')
 parser.add_argument('-P', '--parallel')
 parser.add_argument('-n', '--num')
+
+# COMMON ARGUMENTS:
+parser.add_argument(
+    '-p', '--port',
+    type=int,
+    default=8088,
+    help='allows to use select port number on which the server should listen; the port must be an integer and in the range [1024, 65535], default: 8088')
+parser.add_argument(
+    '-f', '--format',
+    type=str,
+    choices=['B', 'KB', 'MB'],
+    default='MB',
+    help='allows you to choose the format of the summary of results - it should be either in B, KB or MB, default=MB)')
 
 # FUNCTIONS TO CHECK INPUT VALUES
