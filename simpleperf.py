@@ -73,7 +73,7 @@ parser.add_argument(
     default='MB',
     help='allows you to choose the format of the summary of results - it should be either in B, KB or MB, default=MB)')
 
-# FUNCTIONS TO CHECK INPUT VALUES
+# ERROR HANDLING: FUNCTIONS TO CHECK INPUT VALUES
 
 def check_mode(mode):
     # if -s - return server
