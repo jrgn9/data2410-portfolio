@@ -74,13 +74,17 @@ parser.add_argument(
     default='MB',
     help='allows you to choose the format of the summary of results - it should be either in B, KB or MB, default=MB)')
 
+# Variable for the user argument inputs
+args = parser.parse_args()
+
+
 # ERROR HANDLING: FUNCTIONS TO CHECK INPUT VALUES
 
 def check_mode(mode):
     # modus = mode.load
-    if (mode.contains('-s')):
+    if (mode == args.server):
         print("server mode")
-    elif (mode.contains('-c')):
+    elif (mode == args.client):
         print("client mode")
     else:
         raise argparse.ArgumentError(mode, "[MISSING FLAG] Expected flag for client or server mode")
