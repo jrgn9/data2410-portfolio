@@ -35,12 +35,12 @@ def check_port(port):
         raise argparse.ArgumentTypeError("[VALUE ERROR] Expected an integer")
     
     else:   # If port can be cast to an int
-        if (value >= 1024 & value <= 65535):    # If the port has the valid values
+        if (value >= 1024 and value <= 65535):    # If the port has the valid values
             print("[SUCCESS] Port value is valid")
-            return port
+            return value
         else:   # Gives an error if the port is out of range
-            raise argparse.ArgumentError(value, "[VALUE ERROR] Expected port between 1024 and 65535")
-            # sys.exit() ???
+            print("[VALUE ERROR] Expected port between 1024 and 65535")
+            raise argparse.ArgumentError("")
 
 # Check that the argument is an int and a positive number
 def check_positive(num):
