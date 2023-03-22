@@ -3,14 +3,14 @@
 # simpleperf sends and recieves packets between a client and a server using sockets.
 # It runs in two modes: Server mode and client mode.
 
-# Different function imports used in this program
+# Different module imports used in this program
 import argparse # argparse is used for a user friendly command-line interface. Here the user can give arguments when running the program
 import ipaddress    # can be used to check if an ip address is valid. Returns ValueError if not valid
 import re   # Regex functions
-import sys
-import socket
-import threading
-import time
+import sys  # Functions that interact with the interpreter. Like sys.exit()
+import socket   # Functions for socket operations
+import threading    # Functions for server threading
+import time # Various time functions
 
 
 # ERROR HANDLING: FUNCTIONS TO CHECK INPUT VALUES
@@ -124,42 +124,32 @@ if ((not args.server and not args.client) or (args.server and args.client)):
     parser.print_help()
     print("\n *****************************************************")
     print("\n \n [ERROR] CHOOSE MODE: \n--server OR --client. NOT BOTH! \n \n SEE THE HELP MENU ABOVE FOR FLAGS AND ARGUMENTS")
-elif args.server:   # Starts the server function
+elif args.server:   # If server flag is chosen
     print("[SERVER MODE] Starting...")
-    # Brukes til å starte server() funksjon
-elif args.client:   # Starts the client function
+    server_mode()   # Starts the server mode
+elif args.client:   # If client flag is chosen
     print("[CLIENT MODE] Starting...")
-    # Brukes til å starte client() funksjon
+    client_mode()   # Starts the client mode
+
+
+# FUNCTION FOR HANDLING THE SERVER MODE
+def server_mode():
+    PORT = args.port
+    HOST = args.bind
+    ADDR = (HOST, PORT)
+    pass
+
+
+# FUNCTION FOR HANDLING THE CLIENT MODE
+def client_mode():
+    pass
+
+
+
 
 
 
 '''
-
-def client_mode():
-    # Setter HOST, PORT og FILE til å være user argument 0,1 og 2
-    HOST = sys.argv[1]
-    PORT = int(sys.argv[2]) # Burde kanskje hatt error handling for PORT, men lot være i denne oppgaven.
-    FILE = sys.argv[3]
-    ADDR = (HOST, PORT)
-    FORMAT = "utf-8"
-    print(ADDR, FILE)
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Definerer socket med socket familie og type
-
-
-    #print("[ERROR] Could not connect")
-
-    def recieve():
-        try:
-            sock.connect(ADDR)
-            request = f"GET /{FILE} HTTP/1.1"
-            request = request.encode(FORMAT)
-            sock.send(request)
-            print(sock.recv(99999).decode(FORMAT))
-        except:
-            pass
-
-    recieve()
 
 def server_mode():
     # Final/static variabler
@@ -225,5 +215,32 @@ def server_mode():
     # Starter serveren
     print("[STARTING] Server is starting")  # Melding om at serveren starter
     start() # Kaller på funksjonen til å starte serveren
+
+def client_mode():
+    # Setter HOST, PORT og FILE til å være user argument 0,1 og 2
+    HOST = sys.argv[1]
+    PORT = int(sys.argv[2]) # Burde kanskje hatt error handling for PORT, men lot være i denne oppgaven.
+    FILE = sys.argv[3]
+    ADDR = (HOST, PORT)
+    FORMAT = "utf-8"
+    print(ADDR, FILE)
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Definerer socket med socket familie og type
+
+
+    #print("[ERROR] Could not connect")
+
+    def recieve():
+        try:
+            sock.connect(ADDR)
+            request = f"GET /{FILE} HTTP/1.1"
+            request = request.encode(FORMAT)
+            sock.send(request)
+            print(sock.recv(99999).decode(FORMAT))
+        except:
+            pass
+
+    recieve()
+
 
 '''
