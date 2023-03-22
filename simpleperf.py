@@ -14,18 +14,6 @@ import time
 
 # ERROR HANDLING: FUNCTIONS TO CHECK INPUT VALUES
 
-""" 
-
-def check_mode(mode):
-    if (args.server):
-        print("server mode")
-        return mode
-    elif (args.client):
-        print("client mode")
-        return mode
-    else:
-        raise argparse.ArgumentError(mode, "[MISSING FLAG] Expected flag for client or server mode") """
-
 # Uses ipaddress import to check if the address is a valid ip address
 def check_ip(ip_address):
     try:    # This imported function uses ip_address as an argument
