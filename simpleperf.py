@@ -82,19 +82,21 @@ def check_mode(mode):
     pass
 
 def check_ip(ip_address):
-    # Use ipaddress import
-    # ipaddress.ip_address(ip_address)
-    # except ValueError:
-    # See Safiquls code
+    # Uses ipaddress import to check if the address is a valid ip address
+    
+    try:
+        # This imported function uses ip_address as an argument
+        valid = ipaddress.ip_address(ip_address)
 
-    '''
-try:
-       val = ipaddress.ip_address(address)
-       print(f"The IP address {val} is valid.")
+    # Imported function gives a value error if the ip address is not valid
     except ValueError:
-       print(f"The IP address is {address} not valid")
-    '''
-    pass
+        print(f"The IP address {valid} is not valid")
+        # RETURN SOMETHING?
+    
+    # If there are no ValueError:
+    else:
+        print(f"The IP address {valid} is valid")
+        # RETURN SOMETHING?
 
 def check_port(port):
     # check for int, then check for value >= 1024, <= 65535 
