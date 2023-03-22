@@ -111,21 +111,25 @@ args = parser.parse_args()
 
 # parser.print_help()
 
-if ((not args.server and not args.client) or (args.server and args.client)):
-    print("error, u must choose server OR client mode. Not both. Or none.")
-elif args.server:
-    print("server kjører bitch")
-    # Brukes til å starte server() funksjon
-elif args.client:
-    print("klient kjører bitch")
-    # Brukes til å starte client() funksjon
-
-
+# ERROR HANDLING FOR WRONG FLAG COMBINATIONS
 #### OBS!!! FEILHÅNDTER client/server opp mot -I og -b flags
 
 # Prøv å lage en feilhåndtering for flags som ikke hører sammen her
 
-# parser.print_help()
+
+# INVOKING CLIENT OR SERVER MODE
+#Gives error if both or none of the mode flags are chosen
+if ((not args.server and not args.client) or (args.server and args.client)):
+    parser.print_help()
+    print("\n *****************************************************")
+    print("\n \n [ERROR] CHOOSE MODE: \n--server OR --client. NOT BOTH! \n \n SEE THE HELP MENU OVER FOR FLAGS AND ARGUMENTS")
+elif args.server:   # Starts the server function
+    print("[SERVER MODE] Starting...")
+    # Brukes til å starte server() funksjon
+elif args.client:   # Starts the client function
+    print("[CLIENT MODE] Starting...")
+    # Brukes til å starte client() funksjon
+
 
 
 '''
