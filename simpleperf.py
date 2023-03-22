@@ -12,6 +12,7 @@ import socket
 import threading
 import time
 
+
 # ERROR HANDLING: FUNCTIONS TO CHECK INPUT VALUES
 
 # Uses ipaddress import to check if the address is a valid ip address
@@ -22,8 +23,9 @@ def check_ip(ip_address):
         print(f'[INVALID IP] The IP address \'{ip_address}\' is not a valid address!')  # Prints error message
         raise argparse.ArgumentError("")    # raises an ArgumentError in argparse
     else:   # If there are no ValueError:
-        print(f"The IP address {valid} is valid")
-        return ip_address
+        if (ip_address != '127.0.0.1'):  # To avoid getting message for valid IP for when no IP is given (default IP)
+            print(f"[SUCCESS] The IP address {valid} is valid")
+            return ip_address
 
 # Checks if a port is between 1024 and 65535
 def check_port(port):
@@ -34,7 +36,7 @@ def check_port(port):
     
     else:   # If port can be cast to an int
         if (value >= 1024 & value <= 65535):    # If the port has the valid values
-            print("correct port value")
+            print("[SUCCESS] Port value is valid")
             return port
         else:   # Gives an error if the port is out of range
             raise argparse.ArgumentError(value, "[VALUE ERROR] Expected port between 1024 and 65535")
@@ -70,7 +72,6 @@ def check_num(bytes):   # transfer number of bytes specified by -n flag, it shou
         print("Something went wrong with check_num")
         raise argparse.ArgumentError(value, "[VALUE ERROR] Error in number of bytes. it should be either in B, KB or MB. e.g. 1MB")
 
-
 # ARGPARSE - A USER FRIENDLY CLI FOR USER ARGUMENTS
 
 # argparse parser object with a description of what this program do
@@ -79,6 +80,8 @@ parser = argparse.ArgumentParser(
     description="A simple program based on the iPerf tool for measuring network throughput, with a server and a client mode. simpleperf sends and recieves packets between a client and a server using sockets", 
     epilog="end of help")
 
+# ADDS ARGUMENTS TO THE ARGPARSER
+
 # SERVER ARGUMENTS:
 parser.add_argument('-s', '--server', action='store_true', help='enable the server mode. Choosing server or client mode are required.')
 parser.add_argument('-b', '--bind', type=check_ip, default='127.0.0.1',
@@ -86,16 +89,16 @@ parser.add_argument('-b', '--bind', type=check_ip, default='127.0.0.1',
 
 # CLIENT ARGUMENTS:
 parser.add_argument('-c', '--client', action='store_true', help='enable the client mode. Choosing server or client mode are required.')
-#parser.add_argument('-I', '--serverip', type=check_ip, default='127.0.0.1', 
-#    help='allows to select the ip address of the server. It must be in the dotted decimal notation format, e.g. 10.0.0.2 - Default: 127.0.0.1')
+parser.add_argument('-I', '--serverip', type=check_ip, default='127.0.0.1', 
+    help='allows to select the ip address of the server. It must be in the dotted decimal notation format, e.g. 10.0.0.2 - Default: 127.0.0.1')
 #parser.add_argument('-t', '--time', type=check_positive, default=25, help='the total duration in seconds for which data should be generated, also sent to the server. Must be > 0. Default: 25 sec')
 #parser.add_argument('-i', '--interval', type=check_positive, help='print statistics per x seconds')
 #parser.add_argument('-P', '--parallel', choices=range(1,5), default=1, help='creates parallel connections to connect to the server and send data - min value: 1, max value: 5 - default:1')
 #parser.add_argument('-n', '--num', type=check_num, help='transfer number of bytes specified by -n flag, it should be either in B, KB or MB. e.g. 1MB')
 
 # COMMON ARGUMENTS:
-#parser.add_argument('-p', '--port', type=check_port, default=8088, 
-#    help='allows to use select port number on which the server should listen; the port must be an integer and in the range [1024, 65535], default: 8088')
+parser.add_argument('-p', '--port', type=check_port, default=8088, 
+    help='allows to use select port number on which the server should listen; the port must be an integer and in the range [1024, 65535], default: 8088')
 #parser.add_argument('-f', '--format', type=str, choices=['B', 'KB', 'MB'], default='MB', help='allows you to choose the format of the summary of results - it should be either in B, KB or MB, default=MB)') 
 
 # Variable for the user argument inputs
@@ -109,6 +112,15 @@ elif args.server:
 elif args.client:
     print("klient kjører bitch")
     # Brukes til å starte client() funksjon
+
+
+
+
+
+#### OBS!!! FEILHÅNDTER client/server opp mot -I og -b flags
+
+
+
 
 '''
 
