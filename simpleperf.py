@@ -109,20 +109,21 @@ parser.add_argument('-f', '--format', type=str, choices=['B', 'KB', 'MB'], defau
 # Variable for the user argument inputs
 args = parser.parse_args()
 
-# parser.print_help()
 
-# ERROR HANDLING FOR WRONG FLAG COMBINATIONS
-#### OBS!!! FEILHÅNDTER client/server opp mot -I og -b flags
-
-# Prøv å lage en feilhåndtering for flags som ikke hører sammen her
-
+# ERROR HANDLING FOR WRONG FLAG AND MODE COMBINATIONS
+if ((args.client and args.bind) or (args.server and (args.serverip or args.time or args.interval or args.parallel or args.num))) :
+    parser.print_help()
+    print("\n *****************************************************")
+    print("\n \n [FLAG ERROR] Wrong mode and flag combination! \n \n SEE THE HELP MENU ABOVE FOR FLAGS AND ARGUMENTS")
+    sys.exit()
 
 # INVOKING CLIENT OR SERVER MODE
+
 #Gives error if both or none of the mode flags are chosen
 if ((not args.server and not args.client) or (args.server and args.client)):
     parser.print_help()
     print("\n *****************************************************")
-    print("\n \n [ERROR] CHOOSE MODE: \n--server OR --client. NOT BOTH! \n \n SEE THE HELP MENU OVER FOR FLAGS AND ARGUMENTS")
+    print("\n \n [ERROR] CHOOSE MODE: \n--server OR --client. NOT BOTH! \n \n SEE THE HELP MENU ABOVE FOR FLAGS AND ARGUMENTS")
 elif args.server:   # Starts the server function
     print("[SERVER MODE] Starting...")
     # Brukes til å starte server() funksjon
