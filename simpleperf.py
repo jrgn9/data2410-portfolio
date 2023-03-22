@@ -111,8 +111,17 @@ def check_port(port):
 
 # Check that the argument is an int and a positive number
 def check_positive(num):
-    
-    pass
+    try:
+        value = int(num)    # Tries to cast the number to an int
+    except: # If it can't cast port to int, gives an error
+        raise argparse.ArgumentTypeError("[VALUE ERROR] Expected an integer")
+    else:   # If port can be cast to an int
+        if (value >= 0):
+            print("positive value")
+            # RETURN SOMETHING HERE?????
+        else:   # Gives an error if the number is negative
+            raise argparse.ArgumentError(value, "[VALUE ERROR] Expected a positive integer")
+            # sys.exit() ???
 
 def check_num(bytes):
     # split, then check for int and B, KB, MB
