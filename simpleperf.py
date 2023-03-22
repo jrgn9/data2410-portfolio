@@ -95,7 +95,7 @@ parser.add_argument('-I', '--serverip', type=check_ip, default='127.0.0.1',
     help='allows to select the ip address of the server. It must be in the dotted decimal notation format, e.g. 10.0.0.2 - Default: 127.0.0.1')
 parser.add_argument('-t', '--time', type=check_positive, default=25, help='the total duration in seconds for which data should be generated, also sent to the server. Must be > 0. Default: 25 sec')
 parser.add_argument('-i', '--interval', type=check_positive, help='print statistics per x seconds')
-#parser.add_argument('-P', '--parallel', choices=range(1,5), default=1, help='creates parallel connections to connect to the server and send data - min value: 1, max value: 5 - default:1')
+parser.add_argument('-P', '--parallel', type=int, choices=range(1,6), default=1, help='creates parallel connections to connect to the server and send data - min value: 1, max value: 5 - default:1')
 #parser.add_argument('-n', '--num', type=check_num, help='transfer number of bytes specified by -n flag, it should be either in B, KB or MB. e.g. 1MB')
 
 # COMMON ARGUMENTS:
