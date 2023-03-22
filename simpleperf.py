@@ -56,23 +56,27 @@ def check_positive(num):
             raise argparse.ArgumentError("")
 
 def check_num(bytes):   # transfer number of bytes specified by -n flag, it should be either in B, KB or MB. e.g. 1MB
-    byte_type = re.sub(r"[^a-zA-Z]+", "", bytes)    # Strips the input for anything other than a-z and A-Z
-    byte_type.upper()   # Converts the string to upper case
-    byte_amount = re.sub(r"[^0-9", "", bytes)   # Strips the input for anything other than numbers
+    try:
+        byte_type = re.sub('[0-9]','', bytes)    # Strips the input for numbers
+        upper_type = byte_type.upper()   # Converts the string to upper case
+        amount = re.sub('[A-Za-z]','', bytes)   # Strips the input for lower and upper case letters
 
-    print("Byte type:" + byte_type)
-    print("Byte amount:" + byte_amount)
-    
-    # Checks if the value is in bytes, kb or mb and then returns the amount in bytes
-    if (byte_type == 'B'):
-        return byte_amount
-    elif (byte_type == 'KB'):
-        return byte_amount * 1000
-    elif (byte_type == 'MB'):
-        return byte_amount * 1000000
+        byte_amount = int(amount)   # Tries to cast the stripped input to int
+    except:
+        print("[VALUE ERROR] Error in number of bytes. it should be either in B, KB or MB. e.g. 1MB")
+        raise argparse.ArgumentError("")
     else:
-        print("Something went wrong with check_num")
-        raise argparse.ArgumentError(value, "[VALUE ERROR] Error in number of bytes. it should be either in B, KB or MB. e.g. 1MB")
+        # Checks if the value is in bytes, kb or mb and then returns the amount in bytes
+        if (upper_type == 'B'):
+            return byte_amount
+        elif (upper_type == 'KB'):
+            return byte_amount * 1000
+        elif (upper_type == 'MB'):
+            return byte_amount * 1000000
+        else:
+            print("[VALUE ERROR] Error in number of bytes. it should be either in B, KB or MB. e.g. 1MB")
+            raise argparse.ArgumentError("")
+
 
 # ARGPARSE - A USER FRIENDLY CLI FOR USER ARGUMENTS
 
@@ -96,7 +100,7 @@ parser.add_argument('-I', '--serverip', type=check_ip, default='127.0.0.1',
 parser.add_argument('-t', '--time', type=check_positive, default=25, help='the total duration in seconds for which data should be generated, also sent to the server. Must be > 0. Default: 25 sec')
 parser.add_argument('-i', '--interval', type=check_positive, help='print statistics per x seconds')
 parser.add_argument('-P', '--parallel', type=int, choices=range(1,6), default=1, help='creates parallel connections to connect to the server and send data - min value: 1, max value: 5 - default:1')
-#parser.add_argument('-n', '--num', type=check_num, help='transfer number of bytes specified by -n flag, it should be either in B, KB or MB. e.g. 1MB')
+parser.add_argument('-n', '--num', type=check_num, help='transfer number of bytes specified by -n flag, it should be either in B, KB or MB. e.g. 1MB')
 
 # COMMON ARGUMENTS:
 parser.add_argument('-p', '--port', type=check_port, default=8088, 
@@ -116,9 +120,6 @@ elif args.server:
 elif args.client:
     print("klient kjører bitch")
     # Brukes til å starte client() funksjon
-
-
-
 
 
 #### OBS!!! FEILHÅNDTER client/server opp mot -I og -b flags
