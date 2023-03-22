@@ -101,18 +101,18 @@ def check_ip(ip_address):
 def check_port(port):
     # check for int, then check for value >= 1024, <= 65535 
 
-    '''
-def check_port(val):
     try:
-        value = int(val)
-    except ValueError:
-        raise argparse.ArgumentTypeError('expected an integer but you entered a string')
-    if (value<=0):
-        print('it is not a valid port') 
-        sys.exit()
-    return value 
-    '''
-    pass
+        value = int(port)
+    except:
+        raise argparse.ArgumentTypeError("[VALUE ERROR] Expected an integer")
+    else:
+        if (value >= 1024 & value <= 65535):
+            print("correct port value")
+            #RETURN SOMETHING?
+        else:
+            raise argparse.ArgumentError(value, "[VALUE ERROR] Expected port between 1024 and 65535")
+            # sys.exit() ???
+
 
 def check_positive(num):
     # Check that it is a int and a positive number 
