@@ -99,16 +99,25 @@ def check_ip(ip_address):
         # RETURN SOMETHING?
 
 def check_port(port):
-    # check for int, then check for value >= 1024, <= 65535 
-
+# Checks if a port is between 1024 and 65535
+    
+    # Tries to cast the port to int
     try:
         value = int(port)
+
+    # If it can't cast port to int, gives an error
     except:
         raise argparse.ArgumentTypeError("[VALUE ERROR] Expected an integer")
+    
+    # If port can be cast to an int
     else:
+        
+        # If the port has the valid values
         if (value >= 1024 & value <= 65535):
             print("correct port value")
             #RETURN SOMETHING?
+
+        # Gives an error if the port is out of range
         else:
             raise argparse.ArgumentError(value, "[VALUE ERROR] Expected port between 1024 and 65535")
             # sys.exit() ???
