@@ -133,10 +133,108 @@ def check_num(bytes):   # transfer number of bytes specified by -n flag, it shou
     byte_amount = re.sub(r"[^0-9", "", bytes)   # Strips the input for anything other than numbers
     
     if (byte_type == 'B'):
+        # return byte_amount?
         pass
     elif (byte_type == 'KB'):
+        # return byte_amount * 1000?
         pass
     elif (byte_type == 'MB'):
+        # return byte_amount * 10.000?
         pass
     else:
+        # print feil
         pass 
+
+'''
+def client_mode():
+    # Setter HOST, PORT og FILE til å være user argument 0,1 og 2
+    HOST = sys.argv[1]
+    PORT = int(sys.argv[2]) # Burde kanskje hatt error handling for PORT, men lot være i denne oppgaven.
+    FILE = sys.argv[3]
+    ADDR = (HOST, PORT)
+    FORMAT = "utf-8"
+    print(ADDR, FILE)
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Definerer socket med socket familie og type
+
+
+    #print("[ERROR] Could not connect")
+
+    def recieve():
+        try:
+            sock.connect(ADDR)
+            request = f"GET /{FILE} HTTP/1.1"
+            request = request.encode(FORMAT)
+            sock.send(request)
+            print(sock.recv(99999).decode(FORMAT))
+        except:
+            pass
+
+    recieve()
+
+def server_mode():
+    # Final/static variabler
+    PORT = 9999 # Setter port
+    HOST = socket.gethostbyname(socket.gethostbyname(socket.gethostname()))   # Finner host ip automatisk
+    ADDR = (HOST, PORT) # Kaller host og port for ADDR (for å forenkle videre)
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Definerer socket med socket familie og type
+    sock.bind(ADDR) # binder adressen til socketen
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # Hva gjør denne???
+
+    def handle_client():
+        print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}") # prints how many connections that are active in this process
+        pass
+
+    #Funksjon for å starte serveren
+    def start():
+        sock.listen()   # Socket lytter etter connections
+        print(f"[LISTENING] Server listening on {ADDR} \n") # Melding som viser host adresse som lyttes til
+
+        connected = True
+        while connected: # Kjører så lenge det er en connection
+            conn, addr = sock.accept()    # Aksepter connection på adressen som kommer inn
+            request = conn.recv(1024).decode()  # Tar imot request på 1024 bytes
+            print(f"[REQUEST] {request}")   # Printer ut requesten til serveren
+
+            # FEILHÅNDTERING:
+            try:    # Prøver å åpne html-filen
+                # Åpne html fil
+                file = open("index.html", "r")  # HVA GJØR r???
+
+            except FileNotFoundError: # Hvis filen ikke lar seg åpnes/ikke finnes
+                # Sender feilmelding, lager 404 responsmelding og lukker connection
+                fail_msg = "[ERROR] 404 Not Found"
+                fail_msg = fail_msg.encode()
+                conn.send(fail_msg)
+                print("[CONNECTION CLOSED] Error 404 Not Found")
+                response = "HTTP/1.1 404 Not Found\n"
+                response = response.encode()
+                conn.close()
+                connected = False
+
+            else:   # Hvis filen kan åpnes
+                #leser html fil
+                content = file.read()
+                file.close()
+
+                # Lager responsmelding
+                response = "HTTP/1.1 200 OK\n"
+                response += "Content-Type: text/html\n"
+                response += "Content-Length: {}\n".format(len(content))
+                response += "\n"
+                response += content
+                response = response.encode()
+
+                #Sender responsmelding og lukker connection
+                conn.send(response)
+                print(f"[RESPONSE SENT] {response}")
+                print("[CONNECTION CLOSED]")
+                conn.close()
+                connected = False
+
+    # Starter serveren
+    print("[STARTING] Server is starting")  # Melding om at serveren starter
+    start() # Kaller på funksjonen til å starte serveren
+
+'''
