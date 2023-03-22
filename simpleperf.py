@@ -18,11 +18,9 @@ import time
 def check_ip(ip_address):
     try:    # This imported function uses ip_address as an argument
         valid = ipaddress.ip_address(ip_address)
-
     except ValueError:  # Imported function gives a value error if the ip address is not valid
-        print(f"The IP address {valid} is not valid")
-        raise argparse.ArgumentError(ip_address, "[INVALID IP] The IP address is not a valid address")
-
+        print(f'[INVALID IP] The IP address \'{ip_address}\' is not a valid address!')  # Prints error message
+        raise argparse.ArgumentError("")    # raises an ArgumentError in argparse
     else:   # If there are no ValueError:
         print(f"The IP address {valid} is valid")
         return ip_address
@@ -88,17 +86,17 @@ parser.add_argument('-b', '--bind', type=check_ip, default='127.0.0.1',
 
 # CLIENT ARGUMENTS:
 parser.add_argument('-c', '--client', action='store_true', help='enable the client mode. Choosing server or client mode are required.')
-parser.add_argument('-I', '--serverip', type=check_ip, default='127.0.0.1', 
-    help='allows to select the ip address of the server. It must be in the dotted decimal notation format, e.g. 10.0.0.2 - Default: 127.0.0.1')
-parser.add_argument('-t', '--time', type=check_positive, default=25, help='the total duration in seconds for which data should be generated, also sent to the server. Must be > 0. Default: 25 sec')
-parser.add_argument('-i', '--interval', type=check_positive, help='print statistics per x seconds')
-parser.add_argument('-P', '--parallel', choices=range(1,5), default=1, help='creates parallel connections to connect to the server and send data - min value: 1, max value: 5 - default:1')
-parser.add_argument('-n', '--num', type=check_num, help='transfer number of bytes specified by -n flag, it should be either in B, KB or MB. e.g. 1MB')
+#parser.add_argument('-I', '--serverip', type=check_ip, default='127.0.0.1', 
+#    help='allows to select the ip address of the server. It must be in the dotted decimal notation format, e.g. 10.0.0.2 - Default: 127.0.0.1')
+#parser.add_argument('-t', '--time', type=check_positive, default=25, help='the total duration in seconds for which data should be generated, also sent to the server. Must be > 0. Default: 25 sec')
+#parser.add_argument('-i', '--interval', type=check_positive, help='print statistics per x seconds')
+#parser.add_argument('-P', '--parallel', choices=range(1,5), default=1, help='creates parallel connections to connect to the server and send data - min value: 1, max value: 5 - default:1')
+#parser.add_argument('-n', '--num', type=check_num, help='transfer number of bytes specified by -n flag, it should be either in B, KB or MB. e.g. 1MB')
 
 # COMMON ARGUMENTS:
-parser.add_argument('-p', '--port', type=check_port, default=8088, 
-    help='allows to use select port number on which the server should listen; the port must be an integer and in the range [1024, 65535], default: 8088')
-parser.add_argument('-f', '--format', type=str, choices=['B', 'KB', 'MB'], default='MB', help='allows you to choose the format of the summary of results - it should be either in B, KB or MB, default=MB)') 
+#parser.add_argument('-p', '--port', type=check_port, default=8088, 
+#    help='allows to use select port number on which the server should listen; the port must be an integer and in the range [1024, 65535], default: 8088')
+#parser.add_argument('-f', '--format', type=str, choices=['B', 'KB', 'MB'], default='MB', help='allows you to choose the format of the summary of results - it should be either in B, KB or MB, default=MB)') 
 
 # Variable for the user argument inputs
 args = parser.parse_args()
