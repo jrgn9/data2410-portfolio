@@ -23,33 +23,33 @@ parser = argparse.ArgumentParser(
 # SERVER ARGUMENTS:
 parser.add_argument(
     '-s', '--server',
-    type=check_mode(), 
+    type=check_mode, 
     help='enable the server mode. Choosing server or client mode are required.')
 parser.add_argument(
     '-b', '--bind',
-    type=check_ip(),
+    type=check_ip,
     default='127.0.0.1',
     help='allows to select the ip address of the servers interface where the client should connect. It must be in the dotted decimal notation format, e.g. 10.0.0.2 - Default: 127.0.0.1')
 
 # CLIENT ARGUMENTS:
 parser.add_argument(
     '-c', '--client', 
-    type=check_mode(),
+    type=check_mode,
     help='enable the client mode. Choosing server or client mode are required.')
 parser.add_argument(
     '-I', '--serverip',
-    type=check_ip(),
+    type=check_ip,
     default='127.0.0.1',
     help='allows to select the ip address of the server. It must be in the dotted decimal notation format, e.g. 10.0.0.2 - Default: 127.0.0.1')
 parser.add_argument(
     '-t', '--time',
-    type=check_positive(),
+    type=check_positive,
     default=25,
     help='the total duration in seconds for which data should be generated, also sent to the server. Must be > 0. Default: 25 sec'
     )
 parser.add_argument(
     '-i', '--interval',
-    type=check_positive(),
+    type=check_positive,
     help='print statistics per x seconds')
 parser.add_argument(
     '-P', '--parallel',
@@ -58,13 +58,13 @@ parser.add_argument(
     help='creates parallel connections to connect to the server and send data - min value: 1, max value: 5 - default:1')
 parser.add_argument(
     '-n', '--num',
-    type=check_num(),
+    type=check_num,
     help='transfer number of bytes specified by -n flag, it should be either in B, KB or MB. e.g. 1MB')
 
 # COMMON ARGUMENTS:
 parser.add_argument(
     '-p', '--port',
-    type=check_port(),
+    type=check_port,
     default=8088,
     help='allows to use select port number on which the server should listen; the port must be an integer and in the range [1024, 65535], default: 8088')
 parser.add_argument(
@@ -84,8 +84,10 @@ def check_mode(mode):
     # modus = mode.load
     if (mode == args.server):
         print("server mode")
+        return mode
     elif (mode == args.client):
         print("client mode")
+        return mode
     else:
         raise argparse.ArgumentError(mode, "[MISSING FLAG] Expected flag for client or server mode")
 
@@ -96,11 +98,11 @@ def check_ip(ip_address):
 
     except ValueError:  # Imported function gives a value error if the ip address is not valid
         print(f"The IP address {valid} is not valid")
-        # RETURN SOMETHING?
+        raise argparse.ArgumentError(ip_address, "[INVALID IP] The IP address is not a valid address")
 
     else:   # If there are no ValueError:
         print(f"The IP address {valid} is valid")
-        # RETURN SOMETHING?
+        return ip_address
 
 # Checks if a port is between 1024 and 65535
 def check_port(port):
@@ -112,7 +114,7 @@ def check_port(port):
     else:   # If port can be cast to an int
         if (value >= 1024 & value <= 65535):    # If the port has the valid values
             print("correct port value")
-            #RETURN SOMETHING?
+            return port
         else:   # Gives an error if the port is out of range
             raise argparse.ArgumentError(value, "[VALUE ERROR] Expected port between 1024 and 65535")
             # sys.exit() ???
@@ -126,7 +128,7 @@ def check_positive(num):
     else:   # If port can be cast to an int
         if (value >= 0):
             print("positive value")
-            # RETURN SOMETHING HERE?????
+            return num
         else:   # Gives an error if the number is negative
             raise argparse.ArgumentError(value, "[VALUE ERROR] Expected a positive integer")
             # sys.exit() ???
@@ -137,19 +139,18 @@ def check_num(bytes):   # transfer number of bytes specified by -n flag, it shou
     byte_amount = re.sub(r"[^0-9", "", bytes)   # Strips the input for anything other than numbers
     
     if (byte_type == 'B'):
-        # return byte_amount?
-        pass
+        return byte_amount
     elif (byte_type == 'KB'):
-        # return byte_amount * 1000?
-        pass
+        return byte_amount * 1000
     elif (byte_type == 'MB'):
-        # return byte_amount * 10.000?
-        pass
+        return byte_amount * 1000000
     else:
-        # print feil
-        pass 
+        print("Something went wrong with check_num")
+        raise argparse.ArgumentError(value, "[VALUE ERROR] Error in number of bytes. it should be either in B, KB or MB. e.g. 1MB")
 
 '''
+
+
 def client_mode():
     # Setter HOST, PORT og FILE til å være user argument 0,1 og 2
     HOST = sys.argv[1]
