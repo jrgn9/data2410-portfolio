@@ -81,50 +81,37 @@ def check_mode(mode):
     # else - error message
     pass
 
+# Uses ipaddress import to check if the address is a valid ip address
 def check_ip(ip_address):
-    # Uses ipaddress import to check if the address is a valid ip address
-    
-    try:
-        # This imported function uses ip_address as an argument
+    try:    # This imported function uses ip_address as an argument
         valid = ipaddress.ip_address(ip_address)
 
-    # Imported function gives a value error if the ip address is not valid
-    except ValueError:
+    except ValueError:  # Imported function gives a value error if the ip address is not valid
         print(f"The IP address {valid} is not valid")
         # RETURN SOMETHING?
-    
-    # If there are no ValueError:
-    else:
+
+    else:   # If there are no ValueError:
         print(f"The IP address {valid} is valid")
         # RETURN SOMETHING?
 
-def check_port(port):
 # Checks if a port is between 1024 and 65535
-    
-    # Tries to cast the port to int
-    try:
+def check_port(port):
+    try:        # Tries to cast the port to int
         value = int(port)
-
-    # If it can't cast port to int, gives an error
-    except:
+    except: # If it can't cast port to int, gives an error
         raise argparse.ArgumentTypeError("[VALUE ERROR] Expected an integer")
     
-    # If port can be cast to an int
-    else:
-        
-        # If the port has the valid values
-        if (value >= 1024 & value <= 65535):
+    else:   # If port can be cast to an int
+        if (value >= 1024 & value <= 65535):    # If the port has the valid values
             print("correct port value")
             #RETURN SOMETHING?
-
-        # Gives an error if the port is out of range
-        else:
+        else:   # Gives an error if the port is out of range
             raise argparse.ArgumentError(value, "[VALUE ERROR] Expected port between 1024 and 65535")
             # sys.exit() ???
 
-
+# Check that the argument is an int and a positive number
 def check_positive(num):
-    # Check that it is a int and a positive number 
+    
     pass
 
 def check_num(bytes):
