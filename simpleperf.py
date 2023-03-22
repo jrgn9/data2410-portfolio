@@ -55,25 +55,24 @@ def check_positive(num):
             print("[VALUE ERROR] Expected a positive integer")
             raise argparse.ArgumentError("")
 
-def check_num(bytes):   # transfer number of bytes specified by -n flag, it should be either in B, KB or MB. e.g. 1MB
+# Checks amount of bytes the user specifies by the -n flag. Strips number from byte type
+def check_num(bytes):
     try:
         byte_type = re.sub('[0-9]','', bytes)    # Strips the input for numbers
         upper_type = byte_type.upper()   # Converts the string to upper case
         amount = re.sub('[A-Za-z]','', bytes)   # Strips the input for lower and upper case letters
-
         byte_amount = int(amount)   # Tries to cast the stripped input to int
-    except:
+    except ValueError:  # If amount can't be cast to int after being stripped
         print("[VALUE ERROR] Error in number of bytes. it should be either in B, KB or MB. e.g. 1MB")
         raise argparse.ArgumentError("")
-    else:
-        # Checks if the value is in bytes, kb or mb and then returns the amount in bytes
+    else:   # If no errors: Checks if the value is in bytes, kb or mb and then returns the amount in bytes
         if (upper_type == 'B'):
             return byte_amount
         elif (upper_type == 'KB'):
             return byte_amount * 1000
         elif (upper_type == 'MB'):
             return byte_amount * 1000000
-        else:
+        else:   # If the byte type was not converted to B, KB or MB
             print("[VALUE ERROR] Error in number of bytes. it should be either in B, KB or MB. e.g. 1MB")
             raise argparse.ArgumentError("")
 
