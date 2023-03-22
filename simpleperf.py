@@ -10,6 +10,7 @@ import ipaddress
 import socket
 import threading
 import time
+import re
 
 # argparse is used for a user friendly command-line interface. Here the user can give arguments when running the program
 
@@ -76,7 +77,7 @@ parser.add_argument(
 # ERROR HANDLING: FUNCTIONS TO CHECK INPUT VALUES
 
 def check_mode(mode):
-    # if -s - return server
+    # modus = mode.load
     if (mode.contains('-s')):
         print("server mode")
     elif (mode.contains('-c')):
@@ -126,6 +127,16 @@ def check_positive(num):
             raise argparse.ArgumentError(value, "[VALUE ERROR] Expected a positive integer")
             # sys.exit() ???
 
-def check_num(bytes):
-    # split, then check for int and B, KB, MB
-    pass
+def check_num(bytes):   # transfer number of bytes specified by -n flag, it should be either in B, KB or MB. e.g. 1MB
+    byte_type = re.sub(r"[^a-zA-Z]+", "", bytes)    # Strips the input for anything other than a-z and A-Z
+    byte_type.upper()   # Converts the string to upper case
+    byte_amount = re.sub(r"[^0-9", "", bytes)   # Strips the input for anything other than numbers
+    
+    if (byte_type == 'B'):
+        pass
+    elif (byte_type == 'KB'):
+        pass
+    elif (byte_type == 'MB'):
+        pass
+    else:
+        pass 
