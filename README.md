@@ -132,7 +132,7 @@ Client connected with server_IP port XXXX
 |---------|------------|----------|----------|
 | IP:port | 0.0 - 25.0 | X MB     | Y Mbps   |
 
-**Table below lists all the available options that you can use to invoke the server:**
+**Table below lists all the available options that you can use to invoke the client:**
 
 | flag | long flag  | input       | type      | description                                                                                                                                                                                                                          |
 |------|------------|-------------|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|

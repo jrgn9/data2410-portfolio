@@ -14,16 +14,17 @@ import time
 
 # ERROR HANDLING: FUNCTIONS TO CHECK INPUT VALUES
 
+""" 
+
 def check_mode(mode):
-    # modus = mode.load
-    if (mode == args.server):
+    if (args.server):
         print("server mode")
         return mode
-    elif (mode == args.client):
+    elif (args.client):
         print("client mode")
         return mode
     else:
-        raise argparse.ArgumentError(mode, "[MISSING FLAG] Expected flag for client or server mode")
+        raise argparse.ArgumentError(mode, "[MISSING FLAG] Expected flag for client or server mode") """
 
 # Uses ipaddress import to check if the address is a valid ip address
 def check_ip(ip_address):
@@ -93,12 +94,12 @@ parser = argparse.ArgumentParser(
     epilog="end of help")
 
 # SERVER ARGUMENTS:
-parser.add_argument('-s', '--server', type=check_mode, help='enable the server mode. Choosing server or client mode are required.')
+parser.add_argument('-s', '--server', action='store_true', help='enable the server mode. Choosing server or client mode are required.')
 parser.add_argument('-b', '--bind', type=check_ip, default='127.0.0.1',
     help='allows to select the ip address of the servers interface where the client should connect. It must be in the dotted decimal notation format, e.g. 10.0.0.2 - Default: 127.0.0.1')
 
 # CLIENT ARGUMENTS:
-parser.add_argument('-c', '--client', type=check_mode, help='enable the client mode. Choosing server or client mode are required.')
+parser.add_argument('-c', '--client', action='store_true', help='enable the client mode. Choosing server or client mode are required.')
 parser.add_argument('-I', '--serverip', type=check_ip, default='127.0.0.1', 
     help='allows to select the ip address of the server. It must be in the dotted decimal notation format, e.g. 10.0.0.2 - Default: 127.0.0.1')
 parser.add_argument('-t', '--time', type=check_positive, default=25, help='the total duration in seconds for which data should be generated, also sent to the server. Must be > 0. Default: 25 sec')
@@ -109,14 +110,21 @@ parser.add_argument('-n', '--num', type=check_num, help='transfer number of byte
 # COMMON ARGUMENTS:
 parser.add_argument('-p', '--port', type=check_port, default=8088, 
     help='allows to use select port number on which the server should listen; the port must be an integer and in the range [1024, 65535], default: 8088')
-parser.add_argument('-f', '--format', type=str, choices=['B', 'KB', 'MB'], default='MB', help='allows you to choose the format of the summary of results - it should be either in B, KB or MB, default=MB)')
+parser.add_argument('-f', '--format', type=str, choices=['B', 'KB', 'MB'], default='MB', help='allows you to choose the format of the summary of results - it should be either in B, KB or MB, default=MB)') 
 
 # Variable for the user argument inputs
 args = parser.parse_args()
 
+if ((not args.server and not args.client) or (args.server and args.client)):
+    print("error, u must choose server OR client mode. Not both. Or none.")
+elif args.server:
+    print("server kjører bitch")
+    # Brukes til å starte server() funksjon
+elif args.client:
+    print("klient kjører bitch")
+    # Brukes til å starte client() funksjon
 
 '''
-
 
 def client_mode():
     # Setter HOST, PORT og FILE til å være user argument 0,1 og 2
