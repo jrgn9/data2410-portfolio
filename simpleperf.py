@@ -12,6 +12,8 @@ import socket   # Functions for socket operations
 import threading    # Functions for server threading
 import time # Various time functions
 
+# Used to formating, creating lines for print messages
+line = "-" * 42 + "\n"
 
 # ERROR HANDLING: FUNCTIONS TO CHECK INPUT VALUES
 
@@ -123,7 +125,8 @@ if ((args.client and args.bind) or (args.server and (args.serverip or args.time 
 if ((not args.server and not args.client) or (args.server and args.client)):
     parser.print_help()
     print("\n *****************************************************")
-    print("\n \n [ERROR] CHOOSE MODE: \n--server OR --client. NOT BOTH! \n \n SEE THE HELP MENU ABOVE FOR FLAGS AND ARGUMENTS")
+    print("\n \n [ERROR] you must run either in server or client mode \n \n SEE THE HELP MENU ABOVE FOR FLAGS AND ARGUMENTS")
+    sys.exit()
 elif args.server:   # If server flag is chosen
     print("[SERVER MODE] Starting...")
     server_mode()   # Starts the server mode
@@ -134,10 +137,36 @@ elif args.client:   # If client flag is chosen
 
 # FUNCTION FOR HANDLING THE SERVER MODE
 def server_mode():
-    PORT = args.port
-    HOST = args.bind
-    ADDR = (HOST, PORT)
-    pass
+    PORT = args.port    # Port from input
+    SERVER_IP = args.bind    #   SERVER_IP from input
+    ADDR =  (SERVER_IP, PORT) #    SERVER_IP and port called ADDR to simply
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Defines socket with family and type
+    sock.bind(ADDR)     # Binds address to the socket
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # Sock option that allows for reuse of address
+    
+    def start_server():
+        sock.listen()   # Socket listens for connections
+        print(f"{line} A simpleperf server is listening on port {PORT} {line}")
+
+        connected = True
+        while connected:    # Runs as long as there is a connection
+            conn, addr = sock.accept()  # Accepts connection for the incoming address
+            print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{SERVER_IP}:{PORT}>")
+            
+            # Recieves byte in chunks of 1000 bytes, then add them to data for total amount of bytes
+            part = conn.recv(1000).decode()  # Recieves a request for 1000 bytes
+            data += part
+
+            
+
+            # if ikke mer å recieve
+            #conn.close()
+            #print_result()
+            #connected = False
+
+    def print_result():
+        pass
 
 
 # FUNCTION FOR HANDLING THE CLIENT MODE
@@ -154,8 +183,8 @@ def client_mode():
 def server_mode():
     # Final/static variabler
     PORT = 9999 # Setter port
-    HOST = socket.gethostbyname(socket.gethostbyname(socket.gethostname()))   # Finner host ip automatisk
-    ADDR = (HOST, PORT) # Kaller host og port for ADDR (for å forenkle videre)
+    SERVER_IP = socket.ge    SERVER_IPbyname(socket.ge    SERVER_IPbyname(socket.ge    SERVER_IPname()))   # Finner SERVER_IP ip automatisk
+    ADDR =  SERVER_IP, PORT) # Kaller SERVER_IP og port for ADDR (for å forenkle videre)
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Definerer socket med socket familie og type
     sock.bind(ADDR) # binder adressen til socketen
@@ -168,7 +197,7 @@ def server_mode():
     #Funksjon for å starte serveren
     def start():
         sock.listen()   # Socket lytter etter connections
-        print(f"[LISTENING] Server listening on {ADDR} \n") # Melding som viser host adresse som lyttes til
+        print(f"[LISTENING] Server listening on {ADDR} \n") # Melding som viser SERVER_IP adresse som lyttes til
 
         connected = True
         while connected: # Kjører så lenge det er en connection
@@ -217,11 +246,11 @@ def server_mode():
     start() # Kaller på funksjonen til å starte serveren
 
 def client_mode():
-    # Setter HOST, PORT og FILE til å være user argument 0,1 og 2
-    HOST = sys.argv[1]
+    # Setter    SERVER_IP, PORT og FILE til å være user argument 0,1 og 2
+    SERVER_IP = sys.argv[1]
     PORT = int(sys.argv[2]) # Burde kanskje hatt error handling for PORT, men lot være i denne oppgaven.
     FILE = sys.argv[3]
-    ADDR = (HOST, PORT)
+    ADDR =  SERVER_IP, PORT)
     FORMAT = "utf-8"
     print(ADDR, FILE)
 
