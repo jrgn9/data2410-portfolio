@@ -85,7 +85,7 @@ def check_num(bytes):
 parser = argparse.ArgumentParser(
     prog="simpleperf",
     description="A simple program based on the iPerf tool for measuring network throughput, with a server and a client mode. simpleperf sends and recieves packets between a client and a server using sockets", 
-    epilog="end of help")
+    epilog="END OF HELP")
 
 # ADDS ARGUMENTS TO THE ARGPARSER
 
@@ -106,7 +106,7 @@ clientargs.add_argument('-P', '--parallel', type=int, choices=range(1,6), defaul
 clientargs.add_argument('-n', '--num', type=check_num, help='transfer number of bytes specified by -n flag, it should be either in B, KB or MB. e.g. 1MB')
 
 # COMMON ARGUMENTS: Own argument group to show arguments for both modes
-commonargs.parser.add_argument_group("COMMON ARGUMENTS:", "Arguments for both server and client mode")
+commonargs = parser.add_argument_group("COMMON ARGUMENTS:", "Arguments for both server and client mode")
 commonargs.add_argument('-p', '--port', type=check_port, default=8088, 
     help='allows to use select port number on which the server should listen; the port must be an integer and in the range [1024, 65535], default: 8088')
 commonargs.add_argument('-f', '--format', type=str, choices=['B', 'KB', 'MB'], default='MB', help='allows you to choose the format of the summary of results - it should be either in B, KB or MB, default=MB)') 
