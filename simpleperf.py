@@ -89,24 +89,27 @@ parser = argparse.ArgumentParser(
 
 # ADDS ARGUMENTS TO THE ARGPARSER
 
-# SERVER ARGUMENTS:
-parser.add_argument('-s', '--server', action='store_true', help='enable the server mode. Choosing server or client mode are required.')
-parser.add_argument('-b', '--bind', type=check_ip, default='127.0.0.1',
+# SERVER ARGUMENTS: Own argument group to show arguments for server only
+serverargs = parser.add_argument_group("SERVER ARGUMENTS:", "Arguments for server mode only")
+serverargs.add_argument('-s', '--server', action='store_true', help='enable the server mode. Choosing server or client mode are required.')
+serverargs.add_argument('-b', '--bind', type=check_ip, default='127.0.0.1',
     help='allows to select the ip address of the servers interface where the client should connect. It must be in the dotted decimal notation format, e.g. 10.0.0.2 - Default: 127.0.0.1')
 
-# CLIENT ARGUMENTS:
-parser.add_argument('-c', '--client', action='store_true', help='enable the client mode. Choosing server or client mode are required.')
-parser.add_argument('-I', '--serverip', type=check_ip, default='127.0.0.1', 
+# CLIENT ARGUMENTS: Own argument group to show arguments for client only
+clientargs = parser.add_argument_group("CLIENT ARGUMENTS:", "Arguments for client mode only")
+clientargs.add_argument('-c', '--client', action='store_true', help='enable the client mode. Choosing server or client mode are required.')
+clientargs.add_argument('-I', '--serverip', type=check_ip, default='127.0.0.1', 
     help='allows to select the ip address of the server. It must be in the dotted decimal notation format, e.g. 10.0.0.2 - Default: 127.0.0.1')
-parser.add_argument('-t', '--time', type=check_positive, default=25, help='the total duration in seconds for which data should be generated, also sent to the server. Must be > 0. Default: 25 sec')
-parser.add_argument('-i', '--interval', type=check_positive, help='print statistics per x seconds')
-parser.add_argument('-P', '--parallel', type=int, choices=range(1,6), default=1, help='creates parallel connections to connect to the server and send data - min value: 1, max value: 5 - default:1')
-parser.add_argument('-n', '--num', type=check_num, help='transfer number of bytes specified by -n flag, it should be either in B, KB or MB. e.g. 1MB')
+clientargs.add_argument('-t', '--time', type=check_positive, default=25, help='the total duration in seconds for which data should be generated, also sent to the server. Must be > 0. Default: 25 sec')
+clientargs.add_argument('-i', '--interval', type=check_positive, help='print statistics per x seconds')
+clientargs.add_argument('-P', '--parallel', type=int, choices=range(1,6), default=1, help='creates parallel connections to connect to the server and send data - min value: 1, max value: 5 - default:1')
+clientargs.add_argument('-n', '--num', type=check_num, help='transfer number of bytes specified by -n flag, it should be either in B, KB or MB. e.g. 1MB')
 
-# COMMON ARGUMENTS:
-parser.add_argument('-p', '--port', type=check_port, default=8088, 
+# COMMON ARGUMENTS: Own argument group to show arguments for both modes
+commonargs.parser.add_argument_group("COMMON ARGUMENTS:", "Arguments for both server and client mode")
+commonargs.add_argument('-p', '--port', type=check_port, default=8088, 
     help='allows to use select port number on which the server should listen; the port must be an integer and in the range [1024, 65535], default: 8088')
-parser.add_argument('-f', '--format', type=str, choices=['B', 'KB', 'MB'], default='MB', help='allows you to choose the format of the summary of results - it should be either in B, KB or MB, default=MB)') 
+commonargs.add_argument('-f', '--format', type=str, choices=['B', 'KB', 'MB'], default='MB', help='allows you to choose the format of the summary of results - it should be either in B, KB or MB, default=MB)') 
 
 # Variable for the user argument inputs
 args = parser.parse_args()
@@ -168,7 +171,6 @@ def server_mode():
                 conn.close()
                 end_time = time.time()
                 create_result(addr, start_time, end_time, data)
-
                 connected = False
 
     def create_result(addr, start_time, end_time, data):
@@ -191,8 +193,10 @@ def server_mode():
             data = int(data)
             formatted_data = str(data) + "B"
         
-        table_header = ["ID", "Interval", "Recieved", "Rate"]
-        row = [f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"]
+        # Copied from https://learnpython.com/blog/print-table-in-python/
+        table = [["ID", "Interval", "Recieved", "Rate"], [f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"]]
+        for row in table:
+            print('  {:1}   {:^4}   {:>4}   {:<3}  '.format(*row))
 
 
 
