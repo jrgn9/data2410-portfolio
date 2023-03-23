@@ -141,7 +141,7 @@ elif args.client:   # If client flag is chosen
 def server_mode():
     PORT = args.port    # Port from input
     SERVER_IP = args.bind    #   SERVER_IP from input
-    ADDR =  (SERVER_IP, PORT) #    SERVER_IP and port called ADDR to simply
+    ADDR = (SERVER_IP, PORT) #    SERVER_IP and port called ADDR to simply
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Defines socket with family and type
     sock.bind(ADDR)     # Binds address to the socket
@@ -162,25 +162,39 @@ def server_mode():
             part = conn.recv(1000).decode()  # Recieves a request for 1000 bytes
             data += part
             
-            # Regne ut om data skal ha B, KB eller MB ved %1000 og %1000000
-            # if data % 1000000 == 0:
-            #   data = int(data / 1000000)
-            #   data = str(data)
-            #   data += "MB"
+
 
             # Telle tid så lenge while
 
+            if connected==False:
+                conn.close()
+                end_time = time.time()
+                create_result(addr, start_time, end_time, data)
 
+                connected = False
 
-            # if ikke mer å recieve
-            #conn.close()
-            #create_result(addr, time, data)
-            #connected = False
+    def create_result(addr, start_time, end_time, data):
+        client_ip = addr[0]
+        client_port = addr[1]
+        total_time = end_time - start_time
+        rate = 0
 
-            end_time = time.time()
-            total_time = end_time - start_time
-
-    def create_result(addr, time, data):
+        # Regne ut om data skal ha B, KB eller MB ved %1000 og %1000000
+        if data % 1000000 == 0:
+            data = int(data / 1000000)  # divides data with 1000000 and cast to int for value in MB
+            rate = data / total_time    # divide data with total time to get Mbps
+            formatted_data = str(data)  # casts data to string
+            formatted_data += "MB"      # And adds MB to the data string
+        elif data % 1000 == 0:
+            rate = data / total_time    # divide data with total time to get Mbps
+            data = int(data/1000)       # divides data with 1000 and cast to int for value in KB
+            formatted_data = str(data)  # casts data to string
+            formatted_data += "KB"      # And adds KB to the data string
+        else:
+            rate = (data * 1000000) / total_time
+            formatted_data = str(data)
+            formatted_data += "B"
+        
         pass
 
 
