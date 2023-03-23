@@ -161,12 +161,10 @@ def server_mode():
             # Recieves byte in chunks of 1000 bytes, then add them to data for total amount of bytes
             part = conn.recv(1000).decode()  # Recieves a request for 1000 bytes
             data += part
-            
-
 
             # Telle tid så lenge while
 
-            if connected==False:
+            if not part:
                 conn.close()
                 end_time = time.time()
                 create_result(addr, start_time, end_time, data)
@@ -180,22 +178,22 @@ def server_mode():
         rate = 0
 
         # Regne ut om data skal ha B, KB eller MB ved %1000 og %1000000
-        if data % 1000000 == 0:
+        if args.format == 'MB':
             data = int(data / 1000000)  # divides data with 1000000 and cast to int for value in MB
             rate = data / total_time    # divide data with total time to get Mbps
-            formatted_data = str(data)  # casts data to string
-            formatted_data += "MB"      # And adds MB to the data string
-        elif data % 1000 == 0:
+            formatted_data = str(data) + "MB"  # casts data to string and adds MB to the data string
+        elif args.format == 'KB':
             rate = data / total_time    # divide data with total time to get Mbps
             data = int(data/1000)       # divides data with 1000 and cast to int for value in KB
-            formatted_data = str(data)  # casts data to string
-            formatted_data += "KB"      # And adds KB to the data string
-        else:
+            formatted_data = str(data) + "KB"  # casts data to string and adds KB to the data string
+        else:   # 
             rate = (data * 1000000) / total_time
-            formatted_data = str(data)
-            formatted_data += "B"
+            data = int(data)
+            formatted_data = str(data) + "B"
         
-        pass
+        table_header = ["ID", "Interval", "Recieved", "Rate"]
+        row = [f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"]
+
 
 
 # FUNCTION FOR HANDLING THE CLIENT MODE
