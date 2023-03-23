@@ -134,36 +134,6 @@ net["r3"].cmd("ip route add 10.0.2.0/24 via 10.0.3.1 dev r3-eth0")
 net["r3"].cmd("ip route add 10.0.7.0/24 via 10.0.6.2 dev r3-eth3")
 
 
-net["r1"].cmd("ethtool -K r1-eth1 tso off")
-net["r1"].cmd("ethtool -K r1-eth1 gso off")
-net["r1"].cmd("ethtool -K r1-eth1 lro off")
-net["r1"].cmd("ethtool -K r1-eth1 gro off")
-net["r1"].cmd("ethtool -K r1-eth1 ufo off")
-
-
-net["r2"].cmd("ethtool -K r2-eth2 tso off")
-net["r2"].cmd("ethtool -K r2-eth2 gso off")
-net["r2"].cmd("ethtool -K r2-eth2 lro off")
-net["r2"].cmd("ethtool -K r2-eth2 gro off")
-net["r2"].cmd("ethtool -K r2-eth2 ufo off")
-
-
-net["r3"].cmd("ethtool -K r3-eth3 tso off")
-net["r3"].cmd("ethtool -K r3-eth3 gso off")
-net["r3"].cmd("ethtool -K r3-eth3 lro off")
-net["r3"].cmd("ethtool -K r3-eth3 gro off")
-net["r3"].cmd("ethtool -K r3-eth3 ufo off")
-
-for i in range (1,10,1):
-    node = "h" + str(i)
-    iface = node + "-eth0" 
-    net[node].cmd("ethtool -K " + iface + " tso off")
-    net[node].cmd("ethtool -K " + iface + " gso off")
-    net[node].cmd("ethtool -K " + iface + " lro off")
-    net[node].cmd("ethtool -K " + iface + " gro off")
-    net[node].cmd("ethtool -K " + iface + " ufo off")
-
-
 
 net.pingAll()
 CLI( net )
