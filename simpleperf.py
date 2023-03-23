@@ -154,6 +154,7 @@ def server_mode():
         sock.listen()   # Socket listens for connections
         print(f"{line} A simpleperf server is listening on port {PORT} {line}")
 
+        # GJØR DENNE MULTITHREAD!!!!!!!!!!!!!!!!!!!!!!!
         connected = True
         while connected:    # Runs as long as there is a connection
             conn, addr = sock.accept()  # Accepts connection for the incoming address
@@ -167,7 +168,7 @@ def server_mode():
 
             # Telle tid så lenge while
 
-            if not part:
+            if not part:    # IF PACKET = BYE - SÅ SEND ACK:BYE
                 conn.close()
                 end_time = time.time()
                 create_result(addr, start_time, end_time, data)
@@ -203,104 +204,3 @@ def server_mode():
 # FUNCTION FOR HANDLING THE CLIENT MODE
 def client_mode():
     pass
-
-
-
-
-
-
-'''
-
-def server_mode():
-    # Final/static variabler
-    PORT = 9999 # Setter port
-    SERVER_IP = socket.ge    SERVER_IPbyname(socket.ge    SERVER_IPbyname(socket.ge    SERVER_IPname()))   # Finner SERVER_IP ip automatisk
-    ADDR =  SERVER_IP, PORT) # Kaller SERVER_IP og port for ADDR (for å forenkle videre)
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Definerer socket med socket familie og type
-    sock.bind(ADDR) # binder adressen til socketen
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # Hva gjør denne???
-
-    def handle_client():
-        print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}") # prints how many connections that are active in this process
-        pass
-
-    #Funksjon for å starte serveren
-    def start():
-        sock.listen()   # Socket lytter etter connections
-        print(f"[LISTENING] Server listening on {ADDR} \n") # Melding som viser SERVER_IP adresse som lyttes til
-
-        connected = True
-        while connected: # Kjører så lenge det er en connection
-            conn, addr = sock.accept()    # Aksepter connection på adressen som kommer inn
-            request = conn.recv(1024).decode()  # Tar imot request på 1024 bytes
-            print(f"[REQUEST] {request}")   # Printer ut requesten til serveren
-
-            # FEILHÅNDTERING:
-            try:    # Prøver å åpne html-filen
-                # Åpne html fil
-                file = open("index.html", "r")  # HVA GJØR r???
-
-            except FileNotFoundError: # Hvis filen ikke lar seg åpnes/ikke finnes
-                # Sender feilmelding, lager 404 responsmelding og lukker connection
-                fail_msg = "[ERROR] 404 Not Found"
-                fail_msg = fail_msg.encode()
-                conn.send(fail_msg)
-                print("[CONNECTION CLOSED] Error 404 Not Found")
-                response = "HTTP/1.1 404 Not Found\n"
-                response = response.encode()
-                conn.close()
-                connected = False
-
-            else:   # Hvis filen kan åpnes
-                #leser html fil
-                content = file.read()
-                file.close()
-
-                # Lager responsmelding
-                response = "HTTP/1.1 200 OK\n"
-                response += "Content-Type: text/html\n"
-                response += "Content-Length: {}\n".format(len(content))
-                response += "\n"
-                response += content
-                response = response.encode()
-
-                #Sender responsmelding og lukker connection
-                conn.send(response)
-                print(f"[RESPONSE SENT] {response}")
-                print("[CONNECTION CLOSED]")
-                conn.close()
-                connected = False
-
-    # Starter serveren
-    print("[STARTING] Server is starting")  # Melding om at serveren starter
-    start() # Kaller på funksjonen til å starte serveren
-
-def client_mode():
-    # Setter    SERVER_IP, PORT og FILE til å være user argument 0,1 og 2
-    SERVER_IP = sys.argv[1]
-    PORT = int(sys.argv[2]) # Burde kanskje hatt error handling for PORT, men lot være i denne oppgaven.
-    FILE = sys.argv[3]
-    ADDR =  SERVER_IP, PORT)
-    FORMAT = "utf-8"
-    print(ADDR, FILE)
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Definerer socket med socket familie og type
-
-
-    #print("[ERROR] Could not connect")
-
-    def recieve():
-        try:
-            sock.connect(ADDR)
-            request = f"GET /{FILE} HTTP/1.1"
-            request = request.encode(FORMAT)
-            sock.send(request)
-            print(sock.recv(99999).decode(FORMAT))
-        except:
-            pass
-
-    recieve()
-
-
-'''
