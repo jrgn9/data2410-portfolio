@@ -113,12 +113,14 @@ args = parser.parse_args()
 
 
 # ERROR HANDLING FOR WRONG FLAG AND MODE COMBINATIONS
-if ((args.client and args.bind) or (args.server and (args.serverip or args.time or args.interval or args.parallel or args.num))) :
+
+########## SERVER MODE OG BIND GIR FLAG COMBO ERROR NÅ!!!!!!!!!!!!!!!!!!!!!!
+""" if ((args.client and args.bind) or (args.server and (args.serverip or args.time or args.interval or args.parallel or args.num))) :
     parser.print_help()
     print("\n *****************************************************")
     print("\n \n [FLAG ERROR] Wrong mode and flag combination! \n \n SEE THE HELP MENU ABOVE FOR FLAGS AND ARGUMENTS")
     sys.exit()
-
+ """
 # INVOKING CLIENT OR SERVER MODE
 
 #Gives error if both or none of the mode flags are chosen
@@ -153,19 +155,32 @@ def server_mode():
         while connected:    # Runs as long as there is a connection
             conn, addr = sock.accept()  # Accepts connection for the incoming address
             print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{SERVER_IP}:{PORT}>")
+
+            start_time = time.time()
             
             # Recieves byte in chunks of 1000 bytes, then add them to data for total amount of bytes
             part = conn.recv(1000).decode()  # Recieves a request for 1000 bytes
             data += part
-
             
+            # Regne ut om data skal ha B, KB eller MB ved %1000 og %1000000
+            # if data % 1000000 == 0:
+            #   data = int(data / 1000000)
+            #   data = str(data)
+            #   data += "MB"
+
+            # Telle tid så lenge while
+
+
 
             # if ikke mer å recieve
             #conn.close()
-            #print_result()
+            #create_result(addr, time, data)
             #connected = False
 
-    def print_result():
+            end_time = time.time()
+            total_time = end_time - start_time
+
+    def create_result(addr, time, data):
         pass
 
 
