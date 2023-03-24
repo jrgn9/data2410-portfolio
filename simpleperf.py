@@ -113,15 +113,25 @@ commonargs.add_argument('-f', '--format', type=str, choices=['B', 'KB', 'MB'], d
 # Variable for the user argument inputs
 args = parser.parse_args()
 
-
+""" 
 # ERROR HANDLING FOR WRONG FLAG AND MODE COMBINATIONS
 
 ########## SERVER MODE OG BIND GIR FLAG COMBO ERROR NÅ!!!!!!!!!!!!!!!!!!!!!!
-""" if ((args.client and args.bind) or (args.server and (args.serverip or args.time or args.interval or args.parallel or args.num))) :
+if args.serverip != '127.0.0.1':
+    client_serverip = args.serverip
+if args.bind != '127.0.0.1':
+    bind = args.bind
+if args.time != 25:
+    client_time = args.time
+if args.parallel != 1:
+    parallel = args.parallel
+
+if ((args.client and bind) or (args.server and (client_serverip or client_time or args.interval or parallel or args.num))):
     parser.print_help()
     print("\n *****************************************************")
     print("\n \n [FLAG ERROR] Wrong mode and flag combination! \n \n SEE THE HELP MENU ABOVE FOR FLAGS AND ARGUMENTS")
     sys.exit()
+
  """
 
 
@@ -182,14 +192,17 @@ def server_mode():
         
         # Copied from https://learnpython.com/blog/print-table-in-python/
         table = [["ID", "Interval", "Recieved", "Rate"], [f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"]]
+        # for i in table - table[i] append[f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"]
         for row in table:
-            print('  {:1}   {:^4}   {:>4}   {:<3}  '.format(*row))
+            print('  {:1}   {:^4}   {:>4}   {:<3}  '.format(*row))  #\t
 
     start_server()
 
 
 # FUNCTION FOR HANDLING THE CLIENT MODE
 def client_mode():
+    
+    
     pass
 
 
