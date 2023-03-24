@@ -202,19 +202,23 @@ def server_mode():
 
 # FUNCTION FOR HANDLING THE CLIENT MODE
 def client_mode():
-    PORT = int(args.port)       # Port from input
     SERVER_IP = args.serverip   # SERVER_IP from input
-    ADDR = (SERVER_IP, PORT)    # SERVER_IP and port called ADDR to simply
+    SERVER_PORT = int(args.port)       # Port from input
+    SERVER_ADDR = (SERVER_IP, SERVER_PORT)    # SERVER_IP and port called ADDR to simply
+    CLIENT_IP = socket.getsockname[0]
+    CLIENT_PORT = socket.getsockname[1]
+    CLIENT_ADDR = socket.getsockname()
     BYTE_CHUNK = b"0" * 1000    # Chunks to be sent defined as 1000 bytes
     send_time = int(args.time)            # Defined time as the time from user input
     bytes = int(args.num)
 
+
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Defines socket with family and type
 
     def start_client():
-        print(f"{line} A simpleperf client connecting to server {SERVER_IP}, port {PORT} {line}")
+        print(f"{line} A simpleperf client connecting to server {SERVER_IP}, port {SERVER_PORT} {line}")
         try:
-            sock.connect(ADDR)
+            sock.connect(SERVER_ADDR)
         except:
             print("[ERROR] Could not connect, please try again")
         else:
@@ -229,18 +233,46 @@ def client_mode():
                         break
                 end_time = time.time()
                 total_time = end_time - start_time
-                create_result(ADDR, total_time, total_bytes)
+                
             else:           # If there are not defined number, but time instead
                 total_bytes = 0
                 for sec in range(send_time, 0, -1): # Found in https://stackoverflow.com/questions/54426321/implementing-a-60-second-countdown-timer-in-a-print-statement-in-python
                     sock.send(BYTE_CHUNK)
+                    start_time = time.time()
                     total_bytes += 1000
-                
-                create_result(ADDR, send_time, total_bytes)
-            sock.send("BYE").encode(utf-8)
+                end_time = time.time()
+                total_time = end_time - start_time
 
-    def create_result(id, interval, transfer):
-        pass
+            sock.send("BYE").encode(utf-8)
+            create_result(CLIENT_IP, CLIENT_PORT, total_time, total_bytes)
+            server_msg = sock.recv(100)
+            if server_msg == 'ACK:BYE':
+                sock.close()
+
+
+    def create_result(CLIENT_IP, CLIENT_PORT, time, data):
+        start_time = 0
+        end_time = time
+
+        # Regne ut om data skal ha B, KB eller MB ved %1000 og %1000000
+        if args.format == 'MB':
+            data = int(data / 1000000)  # divides data with 1000000 and cast to int for value in MB
+            rate = (data / total_time) * 8     # divide data with total time to get Mbps
+            formatted_data = str(data) + "MB"  # casts data to string and adds MB to the data string
+        elif args.format == 'KB':
+            rate = (data / total_time) * 8    # divide data with total time to get Mbps
+            data = int(data/1000)             # divides data with 1000 and cast to int for value in KB
+            formatted_data = str(data) + "KB" # casts data to string and adds KB to the data string
+        else:   # 
+            rate = ((data * 1000000) / total_time) * 8
+            data = int(data)
+            formatted_data = str(data) + "B"
+
+        # Copied from https://learnpython.com/blog/print-table-in-python/
+        table = [["ID", "Interval", "Transfer", "Bandwith"], [f"{CLIENT_IP}:{CLIENT_PORT}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"]]
+        # for i in table - table[i] append[f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"]
+        for row in table:
+            print('  {:1}   {:^4}   {:>4}   {:<3}  '.format(*row))  #\t
 
     start_client()
 
