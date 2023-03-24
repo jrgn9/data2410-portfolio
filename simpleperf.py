@@ -140,7 +140,6 @@ def server_mode():
     PORT = int(args.port)    # Port from input
     SERVER_IP = args.bind   #   SERVER_IP from input
     ADDR = (SERVER_IP, PORT) #    SERVER_IP and port called ADDR to simply
-    data = 0
     print(ADDR)
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Defines socket with family and type
@@ -160,12 +159,14 @@ def server_mode():
             start_time = time.time()
             
             # Recieves byte in chunks of 1000 bytes, then add them to data for total amount of bytes
+            data = 0
             part = conn.recv(1000).decode()  # Recieves a request for 1000 bytes
-            data += part
+            data += int(part)
 
             # Telle tid så lenge while
 
-            if not part:    # IF PACKET = BYE - SÅ SEND ACK:BYE
+            if conn.recv(1000).decode() == 'BYE':    # IF PACKET = BYE - SÅ SEND ACK:BYE
+                conn.send('ACK:BYE').encode()
                 conn.close()
                 end_time = time.time()
                 create_result(addr, start_time, end_time, data)
@@ -205,12 +206,15 @@ def client_mode():
     SERVER_IP = args.serverip   # SERVER_IP from input
     SERVER_PORT = int(args.port)       # Port from input
     SERVER_ADDR = (SERVER_IP, SERVER_PORT)    # SERVER_IP and port called ADDR to simply
-    CLIENT_IP = socket.getsockname[0]
-    CLIENT_PORT = socket.getsockname[1]
-    CLIENT_ADDR = socket.getsockname()
+
+    #CLIENT_IP = socket.getsockname()[0]
+    #CLIENT_PORT = socket.getsockname()[1]
+    CLIENT_ADDR = socket.gethostname()
+
     BYTE_CHUNK = b"0" * 1000    # Chunks to be sent defined as 1000 bytes
     send_time = int(args.time)            # Defined time as the time from user input
-    bytes = int(args.num)
+    print(args.num)
+    bytes = args.num
 
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Defines socket with family and type
@@ -222,9 +226,11 @@ def client_mode():
         except:
             print("[ERROR] Could not connect, please try again")
         else:
-            if bytes:    # If there are defined number of bytes to be sent
+            print(f"Client connected with {SERVER_IP} port {SERVER_PORT}")
+            if bytes != None:    # If there are defined number of bytes to be sent
+                print(f"bytes = {bytes}")
                 total_bytes = bytes
-                for chunks in bytes:
+                while bytes:
                     sock.send(BYTE_CHUNK)
                     start_time = time.time()
                     bytes - 1000
@@ -235,24 +241,26 @@ def client_mode():
                 total_time = end_time - start_time
                 
             else:           # If there are not defined number, but time instead
+                print(f"Time = {send_time}")
                 total_bytes = 0
                 for sec in range(send_time, 0, -1): # Found in https://stackoverflow.com/questions/54426321/implementing-a-60-second-countdown-timer-in-a-print-statement-in-python
                     sock.send(BYTE_CHUNK)
                     start_time = time.time()
                     total_bytes += 1000
                 end_time = time.time()
-                total_time = end_time - start_time
+                
 
-            sock.send("BYE").encode(utf-8)
-            create_result(CLIENT_IP, CLIENT_PORT, total_time, total_bytes)
-            server_msg = sock.recv(100)
+            sock.send('BYE').encode()
+            create_result(CLIENT_ADDR, start_time, end_time, total_bytes)
+            server_msg = sock.recv(1000).decode()
             if server_msg == 'ACK:BYE':
                 sock.close()
 
 
-    def create_result(CLIENT_IP, CLIENT_PORT, time, data):
-        start_time = 0
-        end_time = time
+    def create_result(CLIENT_ADDR, start_time, end_time, data):
+        total_time = end_time - start_time
+        CLIENT_IP = CLIENT_ADDR[0]
+        CLIENT_PORT = CLIENT_ADDR[1]
 
         # Regne ut om data skal ha B, KB eller MB ved %1000 og %1000000
         if args.format == 'MB':
