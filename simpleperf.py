@@ -159,14 +159,16 @@ def server_mode():
             start_time = time.time()
             
             # Recieves byte in chunks of 1000 bytes, then add them to data for total amount of bytes
-            data = 0
+            data = ''
             part = conn.recv(1000).decode()  # Recieves a request for 1000 bytes
-            data += int(part)
+            data += part
+
+            print(data)
 
             # Telle tid så lenge while
 
-            if conn.recv(1000).decode() == 'BYE':    # IF PACKET = BYE - SÅ SEND ACK:BYE
-                conn.send('ACK:BYE').encode()
+            if re.search(data, 'BYE'):    # IF PACKET = BYE - SÅ SEND ACK:BYE
+                conn.sendall('ACK:BYE'.encode())
                 conn.close()
                 end_time = time.time()
                 create_result(addr, start_time, end_time, data)
@@ -250,7 +252,7 @@ def client_mode():
                 end_time = time.time()
                 
 
-            sock.send('BYE').encode()
+            sock.sendall('BYE'.encode())
             create_result(CLIENT_ADDR, start_time, end_time, total_bytes)
             server_msg = sock.recv(1000).decode()
             if server_msg == 'ACK:BYE':
