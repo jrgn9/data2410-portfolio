@@ -13,7 +13,7 @@ import threading    # Functions for server threading
 import time # Various time functions
 
 # Used to formating, creating lines for print messages
-line = "-" * 42 + "\n"
+line = "\n" + "-" * 48 + "\n"
 
 # ERROR HANDLING: FUNCTIONS TO CHECK INPUT VALUES
 
@@ -25,9 +25,8 @@ def check_ip(ip_address):
         print(f'[INVALID IP] The IP address \'{ip_address}\' is not a valid address!')  # Prints error message
         raise argparse.ArgumentError("")    # raises an ArgumentError in argparse
     else:   # If there are no ValueError:
-        if (ip_address != '127.0.0.1'):  # To avoid getting message for valid IP for when no IP is given (default IP)
-            print(f"[SUCCESS] The IP address {valid} is valid")
-            return ip_address
+        print(f"[SUCCESS] The IP address {valid} is valid")
+        return ip_address
 
 # Checks if a port is between 1024 and 65535
 def check_port(port):
@@ -124,27 +123,14 @@ args = parser.parse_args()
     print("\n \n [FLAG ERROR] Wrong mode and flag combination! \n \n SEE THE HELP MENU ABOVE FOR FLAGS AND ARGUMENTS")
     sys.exit()
  """
-# INVOKING CLIENT OR SERVER MODE
-
-#Gives error if both or none of the mode flags are chosen
-if ((not args.server and not args.client) or (args.server and args.client)):
-    parser.print_help()
-    print("\n *****************************************************")
-    print("\n \n [ERROR] you must run either in server or client mode \n \n SEE THE HELP MENU ABOVE FOR FLAGS AND ARGUMENTS")
-    sys.exit()
-elif args.server:   # If server flag is chosen
-    print("[SERVER MODE] Starting...")
-    server_mode()   # Starts the server mode
-elif args.client:   # If client flag is chosen
-    print("[CLIENT MODE] Starting...")
-    client_mode()   # Starts the client mode
 
 
 # FUNCTION FOR HANDLING THE SERVER MODE
 def server_mode():
-    PORT = args.port    # Port from input
-    SERVER_IP = args.bind    #   SERVER_IP from input
+    PORT = int(args.port)    # Port from input
+    SERVER_IP = args.bind   #   SERVER_IP from input
     ADDR = (SERVER_IP, PORT) #    SERVER_IP and port called ADDR to simply
+    print(ADDR)
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Defines socket with family and type
     sock.bind(ADDR)     # Binds address to the socket
@@ -199,8 +185,25 @@ def server_mode():
         for row in table:
             print('  {:1}   {:^4}   {:>4}   {:<3}  '.format(*row))
 
+    start_server()
 
 
 # FUNCTION FOR HANDLING THE CLIENT MODE
 def client_mode():
     pass
+
+
+
+# INVOKING CLIENT OR SERVER MODE
+#Gives error if both or none of the mode flags are chosen
+if ((not args.server and not args.client) or (args.server and args.client)):
+    parser.print_help()
+    print(line)
+    print("[ERROR] you must run either in server or client mode \n \nSEE THE HELP MENU ABOVE FOR FLAGS AND ARGUMENTS \n")
+    sys.exit()
+elif args.server:   # If server flag is chosen
+    print("[SERVER MODE] Starting...")
+    server_mode()   # Starts the server mode
+elif args.client:   # If client flag is chosen
+    print("[CLIENT MODE] Starting...")
+    client_mode()   # Starts the client mode
