@@ -218,9 +218,14 @@ def client_mode():
             print("[ERROR] Could not connect, please try again")
         else:
             if args.num:    # If there are defined number of bytes to be sent
-                pass
+                bytes = args.num
+                for chunks in bytes:
+                    sock.send(BYTE_CHUNK)
+                    bytes - 1000
+                sock.send("BYE").encode(utf-8)
             else:           # If there are not defined number, but time instead
-                pass
+                for chunks in TIME:
+                    pass
 
     start_client()
 
