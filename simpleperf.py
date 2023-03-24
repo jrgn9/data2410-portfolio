@@ -13,7 +13,7 @@ import threading    # Functions for server threading
 import time # Various time functions
 
 # Used to formating, creating lines for print messages
-line = "\n" + "-" * 48 + "\n"
+line = "\n" + "-" * 65 + "\n"
 
 # ERROR HANDLING: FUNCTIONS TO CHECK INPUT VALUES
 
@@ -148,7 +148,7 @@ def server_mode():
     
     def start_server():
         sock.listen()   # Socket listens for connections
-        print(f"{line} A simpleperf server is listening on port {PORT} {line}")
+        print(f"{line} \t A simpleperf server is listening on port {PORT} {line}")
 
         # GJØR DENNE MULTITHREAD!!!!!!!!!!!!!!!!!!!!!!!
         connected = True
@@ -201,9 +201,28 @@ def server_mode():
 
 # FUNCTION FOR HANDLING THE CLIENT MODE
 def client_mode():
-    
-    
-    pass
+    PORT = int(args.port)    # Port from input
+    SERVER_IP = args.serverip   #   SERVER_IP from input
+    ADDR = (SERVER_IP, PORT) #    SERVER_IP and port called ADDR to simply
+    BYTE_CHUNK = b"0" * 1000
+    TIME = args.time
+
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Defines socket with family and type
+
+    def start_client():
+        print(f"{line} A simpleperf client connecting to server {SERVER_IP}, port {PORT} {line}")
+        try:
+            sock.connect(ADDR)
+        except:
+            print("[ERROR] Could not connect, please try again")
+        else:
+            if args.num:    # If there are defined number of bytes to be sent
+                pass
+            else:           # If there are not defined number, but time instead
+                pass
+
+    start_client()
 
 
 
