@@ -37,7 +37,7 @@ def check_port(port):
     
     else:   # If port can be cast to an int
         if (value >= 1024 and value <= 65535):    # If the port has the valid values
-            print("[SUCCESS] Port value is valid")
+            print("[SUCCESS] port value is valid")
             return value
         else:   # Gives an error if the port is out of range
             print("[VALUE ERROR] Expected port between 1024 and 65535")
@@ -137,42 +137,50 @@ if ((args.client and bind) or (args.server and (client_serverip or client_time o
 
 # FUNCTION FOR HANDLING THE SERVER MODE
 def server_mode():
-    PORT = int(args.port)    # Port from input
-    SERVER_IP = args.bind   #   SERVER_IP from input
-    ADDR = (SERVER_IP, PORT) #    SERVER_IP and port called ADDR to simply
-    print(ADDR)
+    port = int(args.port)    # port from input
+    server_ip = args.bind   #   server_ip from input
+    addr = (server_ip, port) #    server_ip and port called addr to simply
+    print(f"Address: {addr}")
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Defines socket with family and type
-    sock.bind(ADDR)     # Binds address to the socket
+    sock.bind(addr)     # Binds address to the socket
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # Sock option that allows for reuse of address
     
     def start_server():
         sock.listen()   # Socket listens for connections
-        print(f"{line} \t A simpleperf server is listening on port {PORT} {line}")
-
+        print(f"{line} \t A simpleperf server is listening on port {port} {line}")
+        data = ''
+        
         # GJØR DENNE MULTITHREAD!!!!!!!!!!!!!!!!!!!!!!!
         connected = True
         while connected:    # Runs as long as there is a connection
             conn, addr = sock.accept()  # Accepts connection for the incoming address
-            print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{SERVER_IP}:{PORT}>")
+            print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{server_ip}:{port}>")
 
-            start_time = time.time()
+            start_time = time.time()    # The start time for the connection
             
-            # Recieves byte in chunks of 1000 bytes, then add them to data for total amount of bytes
-            data = ''
-            part = conn.recv(1000).decode()  # Recieves a request for 1000 bytes
-            data += part
+            # Recieves byte in packets of 1000 bytes, then add them to data for total amount of bytes
+            while True:
+                part = conn.recv(1000).decode()  # Recieves a request for 1000 bytes
+                print(f"part: {part}")
+                if not part:
+                    break
+                data += part
 
-            print(data)
+                print(f"Data: {data}")
 
-            # Telle tid så lenge while
+                # Telle tid så lenge while
+                bye_msg = re.search('BYE', data)    # Search with regex if the data contains BYE
+                print(f"Bye message: {bye_msg}")
 
-            if re.search(data, 'BYE'):    # IF PACKET = BYE - SÅ SEND ACK:BYE
-                conn.sendall('ACK:BYE'.encode())
-                conn.close()
-                end_time = time.time()
-                create_result(addr, start_time, end_time, data)
-                connected = False
+                if 'BYE' in data:
+                #if bye_msg is not None:    # if there is a BYE message. bye_msg is None if it was not found in data
+                    conn.send('ACK:BYE'.encode())
+                    conn.close()
+                    end_time = time.time()
+                    # Sends data to the result function to create output
+                    create_result(addr, start_time, end_time, data.replace('BYE', ''))  # replaces BYE with an empty string to remove it from data
+                    connected = False
 
     def create_result(addr, start_time, end_time, data):
         client_ip = addr[0]
@@ -205,40 +213,43 @@ def server_mode():
 
 # FUNCTION FOR HANDLING THE CLIENT MODE
 def client_mode():
-    SERVER_IP = args.serverip   # SERVER_IP from input
-    SERVER_PORT = int(args.port)       # Port from input
-    SERVER_ADDR = (SERVER_IP, SERVER_PORT)    # SERVER_IP and port called ADDR to simply
-
-    #CLIENT_IP = socket.getsockname()[0]
-    #CLIENT_PORT = socket.getsockname()[1]
-    CLIENT_ADDR = socket.gethostname()
-
-    BYTE_CHUNK = b"0" * 1000    # Chunks to be sent defined as 1000 bytes
-    send_time = int(args.time)            # Defined time as the time from user input
-    print(args.num)
-    bytes = args.num
-
+    server_ip = args.serverip   # server_ip from input
+    server_port= int(args.port)       # port from input
+    server_addr = (server_ip, server_port)    # server_ip and port called addr to simply
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Defines socket with family and type
 
+    client_ip = sock.getsockname()[0]
+    client_port = sock.getsockname()[1]
+    #client_addr = (client_ip, client_port)
+    client_addr = sock.getsockname()
+
+    packets = b"0" * 1000    # Packets to be sent defined as 1000 bytes
+    send_time = int(args.time)            # Defined time as the time from user input
+    print(args.num)
+    #bytes = args.num
+
+
     def start_client():
-        print(f"{line} A simpleperf client connecting to server {SERVER_IP}, port {SERVER_PORT} {line}")
+        print(f"{line} A simpleperf client connecting to server {server_ip}, port {server_port} {line}")
         try:
-            sock.connect(SERVER_ADDR)
+            sock.connect(server_addr)
         except:
             print("[ERROR] Could not connect, please try again")
         else:
-            print(f"Client connected with {SERVER_IP} port {SERVER_PORT}")
+            print(f"Client connected with {server_ip} port {server_port}")
+            start_time = time.time()
+            bytes = args.num
             if bytes != None:    # If there are defined number of bytes to be sent
                 print(f"bytes = {bytes}")
                 total_bytes = bytes
                 while bytes:
-                    sock.send(BYTE_CHUNK)
-                    start_time = time.time()
-                    bytes - 1000
                     if bytes < 1000:
                         sock.send(b"0" * bytes)
                         break
+                    sock.send(packets)
+
+                    bytes -= 1000
                 end_time = time.time()
                 total_time = end_time - start_time
                 
@@ -246,23 +257,27 @@ def client_mode():
                 print(f"Time = {send_time}")
                 total_bytes = 0
                 for sec in range(send_time, 0, -1): # Found in https://stackoverflow.com/questions/54426321/implementing-a-60-second-countdown-timer-in-a-print-statement-in-python
-                    sock.send(BYTE_CHUNK)
+                    sock.send(packets)
                     start_time = time.time()
                     total_bytes += 1000
                 end_time = time.time()
                 
+            sock.send(b'BYE') #.encode() ?
+            print(f"client_addr: {client_addr}, start_time: {start_time}, end_time: {end_time}, total_bytes: {total_bytes}")
+            create_result(client_addr, start_time, end_time, total_bytes)
+            server_msg = sock.recv(1024)
+            print(f"server_msg: {server_msg}")
+            if server_msg.decode() == 'ACK:BYE':
+                print("Server acknowledged BYE message")
+            else:
+                print("unexpected response from server")
+            sock.close()
 
-            sock.sendall('BYE'.encode())
-            create_result(CLIENT_ADDR, start_time, end_time, total_bytes)
-            server_msg = sock.recv(1000).decode()
-            if server_msg == 'ACK:BYE':
-                sock.close()
 
-
-    def create_result(CLIENT_ADDR, start_time, end_time, data):
+    def create_result(client_addr, start_time, end_time, data):
         total_time = end_time - start_time
-        CLIENT_IP = CLIENT_ADDR[0]
-        CLIENT_PORT = CLIENT_ADDR[1]
+        client_ip = client_addr[0]
+        client_port = client_addr[1]
 
         # Regne ut om data skal ha B, KB eller MB ved %1000 og %1000000
         if args.format == 'MB':
@@ -279,7 +294,7 @@ def client_mode():
             formatted_data = str(data) + "B"
 
         # Copied from https://learnpython.com/blog/print-table-in-python/
-        table = [["ID", "Interval", "Transfer", "Bandwith"], [f"{CLIENT_IP}:{CLIENT_PORT}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"]]
+        table = [["ID", "Interval", "Transfer", "Bandwith"], [f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"]]
         # for i in table - table[i] append[f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"]
         for row in table:
             print('  {:1}   {:^4}   {:>4}   {:<3}  '.format(*row))  #\t
