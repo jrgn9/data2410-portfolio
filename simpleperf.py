@@ -1,6 +1,6 @@
 # simpleperf is a program based on the iPerf tool for measuring network throughput.
 # This program is a simplified network throughput measurement tool. 
-# simpleperf sends and recieves packets between a client and a server using sockets.
+# simpleperf sends and recieves packet between a client and a server using sockets.
 # It runs in two modes: Server mode and client mode.
 
 # Different module imports used in this program
@@ -83,7 +83,7 @@ def check_num(bytes):
 # argparse parser object with a description of what this program do
 parser = argparse.ArgumentParser(
     prog="simpleperf",
-    description="A simple program based on the iPerf tool for measuring network throughput, with a server and a client mode. simpleperf sends and recieves packets between a client and a server using sockets", 
+    description="A simple program based on the iPerf tool for measuring network throughput, with a server and a client mode. simpleperf sends and recieves packet between a client and a server using sockets", 
     epilog="END OF HELP")
 
 # ADDS ARGUMENTS TO THE ARGPARSER
@@ -154,33 +154,37 @@ def server_mode():
         # GJØR DENNE MULTITHREAD!!!!!!!!!!!!!!!!!!!!!!!
         connected = True
         while connected:    # Runs as long as there is a connection
-            conn, addr = sock.accept()  # Accepts connection for the incoming address
-            print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{server_ip}:{port}>")
-            start_time = time.time()    # The start time for the connection
-            data = ''   #Sets data to be an empty string
-            
-            # Recieves byte in packets of 1000 bytes, then add them to data for total amount of bytes
-            while True:
-                part = conn.recv(1000).decode()  # Recieves a request for 1000 bytes
-                print(f"part: {part}")
-                if not part:    # If there is no more parts of packets, break the loop
-                    break
-                data += part    # If there still is more parts, add them to data
+            try:
+                conn, addr = sock.accept()  # Accepts connection for the incoming address
+            except:
+                print("Error......................")
+            else:    
+                print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{server_ip}:{port}>")
+                start_time = time.time()    # The start time for the connection
+                data = ''   #Sets data to be an empty string
+                
+                # Recieves byte in packet of 1000 bytes, then add them to data for total amount of bytes
+                while True:
+                    try:
+                        part = conn.recv(1000).decode()  # Recieves a request for 1000 bytes
+                    except:
+                        print("ERROR 2................")
+                    else:
+                        if not part:    # If there is no more parts of packet, break the loop
+                            break
+                        data += part    # If there still is more parts, add them to data
 
-                print(f"Data: {data}")
-                print(f"Received {len(data)} bytes from {addr}")
+                        print(f"Received a total of {len(data)} bytes from {addr}")
 
-                # Telle tid så lenge while
-                bye_msg = re.search('BYE', data)    # Search with regex if the data contains BYE
-                print(f"Bye message: {bye_msg}")
-
-                if bye_msg is not None:    # if there is a BYE message. bye_msg is None if it was not found in data
-                    conn.send('ACK:BYE'.encode())   # Sends acknowledge to server when there is a bye message
-                    conn.close()    # Closes the connection
-                    end_time = time.time()  # Sets end time
-                    # Sends data to the result function to create output
-                    create_result(addr, start_time, end_time, data.replace('BYE', ''))  # replaces BYE with an empty string to remove it from data
-                    connected = False   # Connection false, stops the loop
+                        bye_msg = re.search('BYE', data)    # Search with regex if the data contains BYE
+                        if bye_msg is not None:    # if there is a BYE message. bye_msg is None if it was not found in data
+                            conn.send('ACK:BYE'.encode())   # Sends acknowledge to server when there is a bye message
+                            conn.close()    # Closes the connection
+                            end_time = time.time()  # Sets end time
+                            # Sends data to the result function to create output
+                            create_result(addr, start_time, end_time, data.replace('BYE', ''))  # replaces BYE with an empty string to remove it from data
+                            connected = False   # Connection false, stops the loop
+                            break
 
     def create_result(addr, start_time, end_time, data):    # Function for creating results
         client_ip = addr[0]
@@ -224,11 +228,8 @@ def client_mode():
     #client_addr = (client_ip, client_port)
     client_addr = sock.getsockname()
 
-    packets = b"0" * 1000    # Packets to be sent defined as 1000 bytes
+    packet = b"0" * 1000    # Packet to be sent defined as 1000 bytes
     send_time = int(args.time)            # Defined time as the time from user input
-    print(args.num)
-    #bytes = args.num
-
 
     def start_client():
         print(f"{line} A simpleperf client connecting to server {server_ip}, port {server_port} {line}")
@@ -241,14 +242,12 @@ def client_mode():
             start_time = time.time()
             bytes = args.num
             if bytes != None:    # If there are defined number of bytes to be sent
-                print(f"bytes = {bytes}")
                 total_bytes = bytes
                 while bytes:
                     if bytes < 1000:
                         sock.send(b"0" * bytes)
                         break
-                    sock.send(packets)
-
+                    sock.send(packet)
                     bytes -= 1000
                 end_time = time.time()
                 total_time = end_time - start_time
@@ -257,7 +256,7 @@ def client_mode():
                 print(f"Time = {send_time}")
                 total_bytes = 0
                 for sec in range(send_time, 0, -1): # Found in https://stackoverflow.com/questions/54426321/implementing-a-60-second-countdown-timer-in-a-print-statement-in-python
-                    sock.send(packets)
+                    sock.send(packet)
                     start_time = time.time()
                     total_bytes += 1000
                 end_time = time.time()
@@ -266,7 +265,6 @@ def client_mode():
             print(f"client_addr: {client_addr}, start_time: {start_time}, end_time: {end_time}, total_bytes: {total_bytes}")
             create_result(client_addr, start_time, end_time, total_bytes)
             server_msg = sock.recv(1024)
-            print(f"server_msg: {server_msg}")
             if server_msg.decode() == 'ACK:BYE':
                 print("Server acknowledged BYE message")
             else:
