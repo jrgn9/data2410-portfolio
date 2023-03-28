@@ -147,42 +147,42 @@ def server_mode():
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # Sock option that allows for reuse of address
     
     def start_server():
+        # CREATE TRY-EXCEPT-ELSE HERE
         sock.listen()   # Socket listens for connections
         print(f"{line} \t A simpleperf server is listening on port {port} {line}")
-        data = ''
         
         # GJØR DENNE MULTITHREAD!!!!!!!!!!!!!!!!!!!!!!!
         connected = True
         while connected:    # Runs as long as there is a connection
             conn, addr = sock.accept()  # Accepts connection for the incoming address
             print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{server_ip}:{port}>")
-
             start_time = time.time()    # The start time for the connection
+            data = ''   #Sets data to be an empty string
             
             # Recieves byte in packets of 1000 bytes, then add them to data for total amount of bytes
             while True:
                 part = conn.recv(1000).decode()  # Recieves a request for 1000 bytes
                 print(f"part: {part}")
-                if not part:
+                if not part:    # If there is no more parts of packets, break the loop
                     break
-                data += part
+                data += part    # If there still is more parts, add them to data
 
                 print(f"Data: {data}")
+                print(f"Received {len(data)} bytes from {addr}")
 
                 # Telle tid så lenge while
                 bye_msg = re.search('BYE', data)    # Search with regex if the data contains BYE
                 print(f"Bye message: {bye_msg}")
 
-                if 'BYE' in data:
-                #if bye_msg is not None:    # if there is a BYE message. bye_msg is None if it was not found in data
-                    conn.send('ACK:BYE'.encode())
-                    conn.close()
-                    end_time = time.time()
+                if bye_msg is not None:    # if there is a BYE message. bye_msg is None if it was not found in data
+                    conn.send('ACK:BYE'.encode())   # Sends acknowledge to server when there is a bye message
+                    conn.close()    # Closes the connection
+                    end_time = time.time()  # Sets end time
                     # Sends data to the result function to create output
                     create_result(addr, start_time, end_time, data.replace('BYE', ''))  # replaces BYE with an empty string to remove it from data
-                    connected = False
+                    connected = False   # Connection false, stops the loop
 
-    def create_result(addr, start_time, end_time, data):
+    def create_result(addr, start_time, end_time, data):    # Function for creating results
         client_ip = addr[0]
         client_port = addr[1]
         total_time = end_time - start_time
@@ -190,16 +190,16 @@ def server_mode():
 
         # Regne ut om data skal ha B, KB eller MB ved %1000 og %1000000
         if args.format == 'MB':
-            data = int(data / 1000000)  # divides data with 1000000 and cast to int for value in MB
+            data = int(data) / 1000000  # divides data with 1000000 and cast to int for value in MB
             rate = (data / total_time) * 8     # divide data with total time to get Mbps
             formatted_data = str(data) + "MB"  # casts data to string and adds MB to the data string
         elif args.format == 'KB':
+            data = int(data)/1000             # divides data with 1000 and cast to int for value in KB
             rate = (data / total_time) * 8    # divide data with total time to get Mbps
-            data = int(data/1000)             # divides data with 1000 and cast to int for value in KB
             formatted_data = str(data) + "KB" # casts data to string and adds KB to the data string
         else:   # 
-            rate = ((data * 1000000) / total_time) * 8
             data = int(data)
+            rate = ((data * 1000000) / total_time) * 8
             formatted_data = str(data) + "B"
         
         # Copied from https://learnpython.com/blog/print-table-in-python/
