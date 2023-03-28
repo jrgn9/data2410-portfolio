@@ -147,21 +147,18 @@ def create_result(mode, addr, start_time, end_time, data):    # Function for cre
     if args.format == 'MB':
         data = float(data) / 1000000  # divides data with 1000000 and cast to int for value in MB
         rate = (data / total_time) * 8     # divide data with total time to get Mbps
+        data = int(data)
         formatted_data = str(data) + "MB"  # casts data to string and adds MB to the data string
     elif args.format == 'KB':
         data = float(data)/1000             # divides data with 1000 and cast to int for value in KB
         rate = (data / total_time) * 8    # divide data with total time to get Mbps
+        data = int(data)
         formatted_data = str(data) + "KB" # casts data to string and adds KB to the data string
     else:   # 
         data = float(data)
         rate = ((data * 1000000) / total_time) * 8
+        data = int(data)    # To make sure data in formatted_data is an interger and not float
         formatted_data = str(data) + "B"
-    
-    # Copied from https://learnpython.com/blog/print-table-in-python/
-    table = [["ID", "Interval", "Recieved", "Rate"], [f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"]]
-    # for i in table - table[i] append[f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"]
-    for row in table:
-        print('  {:1}   {:^4}   {:>4}   {:<3}  '.format(*row))  #\t
     
     # Table from PrettyTable
     result_table = PrettyTable()
@@ -172,7 +169,7 @@ def create_result(mode, addr, start_time, end_time, data):    # Function for cre
     else:
         print("Error in creating result: Wrong mode")
 
-    result_table.add_row([f"{ip}:{port}", f"0.0 - {total_time}", formatted_data, f"{rate} Mbps"])
+    result_table.add_row([f"{ip}:{port}", f"0.0 - {round(total_time, 1)}", formatted_data, f"{round(rate, 2)} Mbps"])
     print(result_table)
 
 
@@ -215,7 +212,8 @@ def server_mode():
                             break
                         data += part    # If there still is more parts, add them to data
 
-                        print(f"Received a total of {len(data)} bytes from {addr}")
+                        if len(data) % 100 == 0:
+                            print(f"Received a total of {len(data)-3} bytes from {addr}")
 
                         bye_msg = re.search('BYE', data)    # Search with regex if the data contains BYE
                         if bye_msg is not None:    # if there is a BYE message. bye_msg is None if it was not found in data
@@ -223,42 +221,9 @@ def server_mode():
                             conn.close()    # Closes the connection
                             end_time = time.time()  # Sets end time
                             # Sends data to the result function to create output
-                            create_result(addr, start_time, end_time, data.replace('BYE', ''))  # replaces BYE with an empty string to remove it from data
+                            create_result('S', addr, start_time, end_time, data.replace('BYE', ''))  # replaces BYE with an empty string to remove it from data
                             connected = False   # Connection false, stops the loop
                             break
-
-    def create_result(addr, start_time, end_time, data):    # Function for creating results
-        client_ip = addr[0]
-        client_port = addr[1]
-        total_time = end_time - start_time
-        rate = 0
-
-        # Regne ut om data skal ha B, KB eller MB ved %1000 og %1000000
-        if args.format == 'MB':
-            data = float(data) / 1000000  # divides data with 1000000 and cast to int for value in MB
-            rate = (data / total_time) * 8     # divide data with total time to get Mbps
-            formatted_data = str(data) + "MB"  # casts data to string and adds MB to the data string
-        elif args.format == 'KB':
-            data = float(data)/1000             # divides data with 1000 and cast to int for value in KB
-            rate = (data / total_time) * 8    # divide data with total time to get Mbps
-            formatted_data = str(data) + "KB" # casts data to string and adds KB to the data string
-        else:   # 
-            data = float(data)
-            rate = ((data * 1000000) / total_time) * 8
-            formatted_data = str(data) + "B"
-        
-        # Copied from https://learnpython.com/blog/print-table-in-python/
-        table = [["ID", "Interval", "Recieved", "Rate"], [f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"]]
-        # for i in table - table[i] append[f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"]
-        for row in table:
-            print('  {:1}   {:^4}   {:>4}   {:<3}  '.format(*row))  #\t
-
-        # Table from PrettyTable
-        client_result = PrettyTable()
-        client_result.field_names = ["ID", "Interval", "Transfer", "Bandwith"]
-        client_result.add_row([f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"])
-        print(client_result)
-
     start_server()
 
 
@@ -308,9 +273,8 @@ def client_mode():
                     total_bytes += 1000
                 end_time = time.time()
                 
-            sock.send(b'BYE') #.encode() ?
-            print(f"client_addr: {client_addr}, start_time: {start_time}, end_time: {end_time}, total_bytes: {total_bytes}")
-            create_result(client_addr, start_time, end_time, total_bytes)
+            sock.send(b'BYE')
+            create_result('C', client_addr, start_time, end_time, total_bytes)
             server_msg = sock.recv(1024)
             if server_msg.decode() == 'ACK:BYE':
                 print("Server acknowledged BYE message")
@@ -318,40 +282,7 @@ def client_mode():
                 print("unexpected response from server")
             sock.close()
 
-
-    def create_result(client_addr, start_time, end_time, data):
-        total_time = end_time - start_time
-        client_ip = client_addr[0]
-        client_port = client_addr[1]
-
-        # Regne ut om data skal ha B, KB eller MB ved %1000 og %1000000
-        if args.format == 'MB':
-            data = float(data / 1000000)  # divides data with 1000000 and cast to int for value in MB
-            rate = (data / total_time) * 8     # divide data with total time to get Mbps
-            formatted_data = str(data) + "MB"  # casts data to string and adds MB to the data string
-        elif args.format == 'KB':
-            rate = (data / total_time) * 8    # divide data with total time to get Mbps
-            data = float(data/1000)             # divides data with 1000 and cast to int for value in KB
-            formatted_data = str(data) + "KB" # casts data to string and adds KB to the data string
-        else:   # 
-            rate = ((data * 1000000) / total_time) * 8
-            data = float(data)
-            formatted_data = str(data) + "B"
-
-        # Copied from https://learnpython.com/blog/print-table-in-python/
-        table = [["ID", "Interval", "Transfer", "Bandwith"], [f"{client_ip}:{client_port}", f"0.0 - {total_time}", formatted_data, f"{rate} Mbps"]]
-        # for i in table - table[i] append[f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"]
-        for row in table:
-            print('  {:1}   {:^4}   {:>4}   {:<3}  '.format(*row))  #\t
-
-        # Table from PrettyTable
-        client_result = PrettyTable()
-        client_result.field_names = ["ID", "Interval", "Transfer", "Bandwith"]
-        client_result.add_row([f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"])
-        print(client_result)
-
     start_client()
-
 
 
 # INVOKING CLIENT OR SERVER MODE
