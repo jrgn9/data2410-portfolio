@@ -11,6 +11,7 @@ import sys  # Functions that interact with the interpreter. Like sys.exit()
 import socket   # Functions for socket operations
 import threading    # Functions for server threading
 import time # Various time functions
+from prettytable import PrettyTable # Table formating library. Must be installed with pip: python -m pip install -U prettytable
 
 # Used to formating, creating lines for print messages
 line = "\n" + "-" * 65 + "\n"
@@ -134,6 +135,46 @@ if ((args.client and bind) or (args.server and (client_serverip or client_time o
 
  """
 
+# IMPLEMENT THIS AS A COMMON RESULT PRINTER - TAKES MODE AS C OR S AS ARGUMENT TO CREATE CORRECT TABLE HEADER
+def create_result(mode, addr, start_time, end_time, data):    # Function for creating results
+    ip = addr[0]
+    port = addr[1]
+    total_time = end_time - start_time
+    mode = mode.upper()
+    rate = 0
+
+    # Regne ut om data skal ha B, KB eller MB ved %1000 og %1000000
+    if args.format == 'MB':
+        data = float(data) / 1000000  # divides data with 1000000 and cast to int for value in MB
+        rate = (data / total_time) * 8     # divide data with total time to get Mbps
+        formatted_data = str(data) + "MB"  # casts data to string and adds MB to the data string
+    elif args.format == 'KB':
+        data = float(data)/1000             # divides data with 1000 and cast to int for value in KB
+        rate = (data / total_time) * 8    # divide data with total time to get Mbps
+        formatted_data = str(data) + "KB" # casts data to string and adds KB to the data string
+    else:   # 
+        data = float(data)
+        rate = ((data * 1000000) / total_time) * 8
+        formatted_data = str(data) + "B"
+    
+    # Copied from https://learnpython.com/blog/print-table-in-python/
+    table = [["ID", "Interval", "Recieved", "Rate"], [f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"]]
+    # for i in table - table[i] append[f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"]
+    for row in table:
+        print('  {:1}   {:^4}   {:>4}   {:<3}  '.format(*row))  #\t
+    
+    # Table from PrettyTable
+    result_table = PrettyTable()
+    if mode == 'C':
+        result_table.field_names = ["ID", "Interval", "Transfer", "Bandwith"]
+    elif mode == 'S':
+        result_table.field_names = ["ID", "Interval", "Recieved", "Rate"]
+    else:
+        print("Error in creating result: Wrong mode")
+
+    result_table.add_row([f"{ip}:{port}", f"0.0 - {total_time}", formatted_data, f"{rate} Mbps"])
+    print(result_table)
+
 
 # FUNCTION FOR HANDLING THE SERVER MODE
 def server_mode():
@@ -194,15 +235,15 @@ def server_mode():
 
         # Regne ut om data skal ha B, KB eller MB ved %1000 og %1000000
         if args.format == 'MB':
-            data = int(data) / 1000000  # divides data with 1000000 and cast to int for value in MB
+            data = float(data) / 1000000  # divides data with 1000000 and cast to int for value in MB
             rate = (data / total_time) * 8     # divide data with total time to get Mbps
             formatted_data = str(data) + "MB"  # casts data to string and adds MB to the data string
         elif args.format == 'KB':
-            data = int(data)/1000             # divides data with 1000 and cast to int for value in KB
+            data = float(data)/1000             # divides data with 1000 and cast to int for value in KB
             rate = (data / total_time) * 8    # divide data with total time to get Mbps
             formatted_data = str(data) + "KB" # casts data to string and adds KB to the data string
         else:   # 
-            data = int(data)
+            data = float(data)
             rate = ((data * 1000000) / total_time) * 8
             formatted_data = str(data) + "B"
         
@@ -211,6 +252,12 @@ def server_mode():
         # for i in table - table[i] append[f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"]
         for row in table:
             print('  {:1}   {:^4}   {:>4}   {:<3}  '.format(*row))  #\t
+
+        # Table from PrettyTable
+        client_result = PrettyTable()
+        client_result.field_names = ["ID", "Interval", "Transfer", "Bandwith"]
+        client_result.add_row([f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"])
+        print(client_result)
 
     start_server()
 
@@ -279,23 +326,29 @@ def client_mode():
 
         # Regne ut om data skal ha B, KB eller MB ved %1000 og %1000000
         if args.format == 'MB':
-            data = int(data / 1000000)  # divides data with 1000000 and cast to int for value in MB
+            data = float(data / 1000000)  # divides data with 1000000 and cast to int for value in MB
             rate = (data / total_time) * 8     # divide data with total time to get Mbps
             formatted_data = str(data) + "MB"  # casts data to string and adds MB to the data string
         elif args.format == 'KB':
             rate = (data / total_time) * 8    # divide data with total time to get Mbps
-            data = int(data/1000)             # divides data with 1000 and cast to int for value in KB
+            data = float(data/1000)             # divides data with 1000 and cast to int for value in KB
             formatted_data = str(data) + "KB" # casts data to string and adds KB to the data string
         else:   # 
             rate = ((data * 1000000) / total_time) * 8
-            data = int(data)
+            data = float(data)
             formatted_data = str(data) + "B"
 
         # Copied from https://learnpython.com/blog/print-table-in-python/
-        table = [["ID", "Interval", "Transfer", "Bandwith"], [f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"]]
+        table = [["ID", "Interval", "Transfer", "Bandwith"], [f"{client_ip}:{client_port}", f"0.0 - {total_time}", formatted_data, f"{rate} Mbps"]]
         # for i in table - table[i] append[f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"]
         for row in table:
             print('  {:1}   {:^4}   {:>4}   {:<3}  '.format(*row))  #\t
+
+        # Table from PrettyTable
+        client_result = PrettyTable()
+        client_result.field_names = ["ID", "Interval", "Transfer", "Bandwith"]
+        client_result.add_row([f"{client_ip}:{client_port}", f"{start_time} - {end_time}", formatted_data, f"{rate} Mbps"])
+        print(client_result)
 
     start_client()
 
