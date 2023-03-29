@@ -143,6 +143,8 @@ def create_result(mode, addr, start_time, end_time, data):    # Function for cre
     mode = mode.upper()
     rate = 0
 
+    # SETT RATE UTENFOR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+
     # Regne ut om data skal ha B, KB eller MB ved %1000 og %1000000
     if args.format == 'MB':
         data = float(data) / 1000000  # divides data with 1000000 and cast to int for value in MB
@@ -192,6 +194,7 @@ def server_mode():
     def handle_client(conn, addr):
         print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{server_ip}:{port}> \n")
         start_time = time.time()    # The start time for the connection
+        end_time = 0
         data = b''   #Sets data to be an empty byte object
         
         # Recieves byte in packet of 1000 bytes, then add them to data for total amount of bytes
@@ -202,11 +205,11 @@ def server_mode():
             except Exception as e:
                 print(f"[ERROR] {e}")
             else:
-                if not part:    # If there is no more parts of packet, break the loop
-                    break
+                #if not part:    # If there is no more parts of packet, break the loop
+                #    break
                 data += part    # If there still is more parts, add them to data
 
-                bye_msg = re.search(b'BYE', data)    # Search with regex if the data contains BYE
+                #bye_msg = re.search(b'BYE', data)    # Search with regex if the data contains BYE
                 #if bye_msg is not None:    # if there is a BYE message. bye_msg is None if it was not found in data
                 if b'BYE' in data:
                     conn.sendall(b'ACK:BYE')   # Sends acknowledge to server when there is a bye message
@@ -223,9 +226,9 @@ def server_mode():
                         if zero == '0':
                             count += 1
                     data = count """
-
-                    create_result('S', addr, start_time, end_time, data)  # replaces BYE with an empty string to remove it from data
+            
                     break
+        create_result('S', addr, start_time, end_time, data)  # replaces BYE with an empty string to remove it from data
 
     def start_server():
         sock.listen()   # Socket listens for connections
@@ -293,9 +296,10 @@ def client_mode():
                 
             sock.sendall(b'BYE')
             server_msg = sock.recv(1024)
+            create_result('C', client_addr, start_time, end_time, total_bytes)
             if server_msg == b'ACK:BYE':
                 print("[SUCCESS] Server acknowledged BYE message \n")
-                create_result('C', client_addr, start_time, end_time, total_bytes)
+                #create_result('C', client_addr, start_time, end_time, total_bytes)
             else:
                 print("[ERROR] Unexpected response from server")
             sock.close()
