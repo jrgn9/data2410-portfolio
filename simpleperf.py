@@ -170,9 +170,14 @@ def create_result(mode, addr, start_time, end_time, data):    # Function for cre
         print("Error in creating result: Wrong mode")
 
     result_table.add_row([f"{ip}:{port}", f"0.0 - {round(total_time, 1)}", formatted_data, f"{round(rate, 2)} Mbps"])
-    print(result_table)
-
+    # Løkke her for å få ut flere resultater
+    result_table.add_row(["----------------","---------","--------","----------"])
     # OBS!!! MÅ HA EN SUMMARY PRINT TIL SLUTT - SE OPPGAVE
+    result_table.add_row(["A summary", "will be", "printed", "here soon"])
+    print(result_table)
+    print("")
+
+
 
 
 # FUNCTION FOR HANDLING THE SERVER MODE
@@ -200,7 +205,7 @@ def server_mode():
                 print("Quitting server")
                 break
             else:    
-                print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{server_ip}:{port}>")
+                print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{server_ip}:{port}> \n")
                 start_time = time.time()    # The start time for the connection
                 data = b''   #Sets data to be an empty byte object
                 
@@ -261,7 +266,7 @@ def client_mode():
             client_port = sock.getsockname()[1]
             client_addr = (client_ip, client_port)
 
-            print(f"Client connected with {server_ip} port {server_port}")
+            print(f"Client connected with {server_ip} port {server_port} \n")
             start_time = time.time()
             bytes = args.num
             if bytes != None:    # If there are defined number of bytes to be sent
@@ -276,7 +281,6 @@ def client_mode():
                 total_time = end_time - start_time
                 
             else:           # If there are not defined number, but time instead
-                print(f"Time = {send_time}")
                 total_bytes = 0
                 end_time = start_time + send_time
                 while time.time() < end_time:
@@ -286,7 +290,7 @@ def client_mode():
             sock.sendall(b'BYE')
             server_msg = sock.recv(1024)
             if server_msg == b'ACK:BYE':
-                print("[SUCCESS] Server acknowledged BYE message")
+                print("[SUCCESS] Server acknowledged BYE message \n")
                 create_result('C', client_addr, start_time, end_time, total_bytes)
             else:
                 print("[ERROR] Unexpected response from server")
