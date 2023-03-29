@@ -140,7 +140,6 @@ def create_result(mode, addr, start_time, end_time, data):    # Function for cre
     ip = addr[0]
     port = addr[1]
     total_time = end_time - start_time
-    mode = mode.upper()
     
     rate = ((data / total_time) / 1000000 ) * 8
 
@@ -186,35 +185,18 @@ def server_mode():
         
         # Recieves byte in packet of 1000 bytes, then add them to data for total amount of bytes
         while True:
-            try:
-                part = conn.recv(1000)  # Recieves a request for 1000 bytes
-                #print(f"Part; {part}")
-            except Exception as e:
-                print(f"[ERROR] {e}")
-            else:
-                #if not part:    # If there is no more parts of packet, break the loop
-                #    break
-                data += part    # If there still is more parts, add them to data
+            #OBS: HAR FJERNET TRY/EXCEPT/ELSE HER!!!
+            part = conn.recv(1000)  # Recieves a request for 1000 bytes
+            data += part    # If there still is more parts, add them to data
 
-                #bye_msg = re.search(b'BYE', data)    # Search with regex if the data contains BYE
-                #if bye_msg is not None:    # if there is a BYE message. bye_msg is None if it was not found in data
-                if b'BYE' in data:
-                    conn.sendall(b'ACK:BYE')   # Sends acknowledge to server when there is a bye message
-                    conn.close()    # Closes the connection
-                    end_time = time.time()  # Sets end time
-                    # Sends data to the result function to create output
-
-                    # Convert data from a string of zeros to amount of bytes as an int before sending it to print results
-                    data = len(data) - 3 
-
-                    """                             
-                    count = 0
-                    for zero in data:
-                        if zero == '0':
-                            count += 1
-                    data = count """
-            
-                    break
+            #bye_msg = re.search(b'BYE', data)    # Search with regex if the data contains BYE
+            #if bye_msg is not None:    # if there is a BYE message. bye_msg is None if it was not found in data
+            if b'BYE' in data:
+                end_time = time.time()  # Sets end time
+                conn.sendall(b'ACK:BYE')   # Sends acknowledge to server when there is a bye message
+                conn.close()    # Closes the connection
+                data = len(data) - 3 
+                break
         create_result('S', addr, start_time, end_time, data)  # replaces BYE with an empty string to remove it from data
 
     def start_server():
@@ -225,8 +207,8 @@ def server_mode():
             try:
                 conn, addr = sock.accept()  # Accepts connection for the incoming address
             except:
-                conn.close()
                 print("[ERROR] Could not connect")
+                conn.close()
                 break
             else:
                 thread = threading.Thread(target=handle_client, args=(conn, addr))  # Lager ny thread hvor target er handle funksjonen og den sender conn og addr som argumenter
@@ -272,7 +254,6 @@ def client_mode():
                     sock.send(packet)
                     bytes -= 1000
                 end_time = time.time()
-                total_time = end_time - start_time
                 
             else:           # If there are not defined number, but time instead
                 total_bytes = 0
@@ -280,7 +261,6 @@ def client_mode():
                 while time.time() < end_time:
                     sock.send(packet)
                     total_bytes += 1000
-                
             sock.sendall(b'BYE')
             server_msg = sock.recv(1024)
             create_result('C', client_addr, start_time, end_time, total_bytes)
