@@ -188,57 +188,63 @@ def server_mode():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Defines socket with family and type
     sock.bind(addr)     # Binds address to the socket
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # Sock option that allows for reuse of address
-    
+
+    def handle_client(conn, addr):
+        print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{server_ip}:{port}> \n")
+        start_time = time.time()    # The start time for the connection
+        data = b''   #Sets data to be an empty byte object
+        
+        # Recieves byte in packet of 1000 bytes, then add them to data for total amount of bytes
+        while True:
+            try:
+                part = conn.recv(1000)  # Recieves a request for 1000 bytes
+                #print(f"Part; {part}")
+            except Exception as e:
+                print(f"[ERROR] {e}")
+            else:
+                if not part:    # If there is no more parts of packet, break the loop
+                    break
+                data += part    # If there still is more parts, add them to data
+
+                bye_msg = re.search(b'BYE', data)    # Search with regex if the data contains BYE
+                #if bye_msg is not None:    # if there is a BYE message. bye_msg is None if it was not found in data
+                if b'BYE' in data:
+                    conn.sendall(b'ACK:BYE')   # Sends acknowledge to server when there is a bye message
+                    conn.close()    # Closes the connection
+                    end_time = time.time()  # Sets end time
+                    # Sends data to the result function to create output
+
+                    # Convert data from a string of zeros to amount of bytes as an int before sending it to print results
+                    data = len(data) - 3 
+
+                    """                             
+                    count = 0
+                    for zero in data:
+                        if zero == '0':
+                            count += 1
+                    data = count """
+
+                    create_result('S', addr, start_time, end_time, data)  # replaces BYE with an empty string to remove it from data
+                    break
+
     def start_server():
-        # CREATE TRY-EXCEPT-ELSE HERE
         sock.listen()   # Socket listens for connections
         print(f"{line} \t A simpleperf server is listening on port {port} {line}")
-        
-        # GJØR DENNE MULTITHREAD!!!!!!!!!!!!!!!!!!!!!!!
+
         while True:    # Runs as long as there is a connection
             try:
                 conn, addr = sock.accept()  # Accepts connection for the incoming address
             except:
                 conn.close()
-                print("Quitting server")
+                print("[ERROR] Could not connect")
                 break
-            else:    
-                print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{server_ip}:{port}> \n")
-                start_time = time.time()    # The start time for the connection
-                data = b''   #Sets data to be an empty byte object
-                
-                # Recieves byte in packet of 1000 bytes, then add them to data for total amount of bytes
-                while True:
-                    try:
-                        part = conn.recv(1000)  # Recieves a request for 1000 bytes
-                        #print(f"Part; {part}")
-                    except Exception as e:
-                        print(f"[ERROR] {e}")
-                    else:
-                        if not part:    # If there is no more parts of packet, break the loop
-                            break
-                        data += part    # If there still is more parts, add them to data
+            else:
+                thread = threading.Thread(target=handle_client, args=(conn, addr))  # Lager ny thread hvor target er handle funksjonen og den sender conn og addr som argumenter
+                thread.start()  # Starter ny thread
+                # Printer hvor mange connections som er aktive
+                # - 1 fordi listen vil alltid kjøre som en thread før noen har koblet til
+                print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1} \n") 
 
-                        bye_msg = re.search(b'BYE', data)    # Search with regex if the data contains BYE
-                        #if bye_msg is not None:    # if there is a BYE message. bye_msg is None if it was not found in data
-                        if b'BYE' in data:
-                            conn.sendall(b'ACK:BYE')   # Sends acknowledge to server when there is a bye message
-                            conn.close()    # Closes the connection
-                            end_time = time.time()  # Sets end time
-                            # Sends data to the result function to create output
-
-                            # Convert data from a string of zeros to amount of bytes as an int before sending it to print results
-                            data = len(data) - 3 
-
-                            """                             
-                            count = 0
-                            for zero in data:
-                                if zero == '0':
-                                    count += 1
-                            data = count """
-
-                            create_result('S', addr, start_time, end_time, data)  # replaces BYE with an empty string to remove it from data
-                            break
     start_server()
 
 
