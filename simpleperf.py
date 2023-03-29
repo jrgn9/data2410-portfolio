@@ -135,7 +135,7 @@ if ((args.client and bind) or (args.server and (client_serverip or client_time o
 
  """
 
-# IMPLEMENT THIS AS A COMMON RESULT PRINTER - TAKES MODE AS C OR S AS ARGUMENT TO CREATE CORRECT TABLE HEADER
+# CREATES RESULTS AND PRINT TABLE - Based on what is sent from the server and client functions
 def create_result(mode, addr, start_time, end_time, data):    # Function for creating results
     ip = addr[0]
     port = addr[1]
@@ -192,32 +192,34 @@ def server_mode():
         print(f"{line} \t A simpleperf server is listening on port {port} {line}")
         
         # GJØR DENNE MULTITHREAD!!!!!!!!!!!!!!!!!!!!!!!
-        connected = True
-        while connected:    # Runs as long as there is a connection
+        while True:    # Runs as long as there is a connection
             try:
                 conn, addr = sock.accept()  # Accepts connection for the incoming address
             except:
-                print("Error......................")
                 conn.close()
+                print("Quitting server")
+                break
             else:    
                 print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{server_ip}:{port}>")
                 start_time = time.time()    # The start time for the connection
-                data = ''   #Sets data to be an empty string
+                data = b''   #Sets data to be an empty byte object
                 
                 # Recieves byte in packet of 1000 bytes, then add them to data for total amount of bytes
                 while True:
                     try:
-                        part = conn.recv(1000).decode()  # Recieves a request for 1000 bytes
-                    except:
-                        print("ERROR 2................")
+                        part = conn.recv(1000)  # Recieves a request for 1000 bytes
+                        #print(f"Part; {part}")
+                    except Exception as e:
+                        print(f"[ERROR] {e}")
                     else:
                         if not part:    # If there is no more parts of packet, break the loop
                             break
                         data += part    # If there still is more parts, add them to data
 
-                        bye_msg = re.search('BYE', data)    # Search with regex if the data contains BYE
-                        if bye_msg is not None:    # if there is a BYE message. bye_msg is None if it was not found in data
-                            conn.send('ACK:BYE'.encode())   # Sends acknowledge to server when there is a bye message
+                        bye_msg = re.search(b'BYE', data)    # Search with regex if the data contains BYE
+                        #if bye_msg is not None:    # if there is a BYE message. bye_msg is None if it was not found in data
+                        if b'BYE' in data:
+                            conn.sendall(b'ACK:BYE')   # Sends acknowledge to server when there is a bye message
                             conn.close()    # Closes the connection
                             end_time = time.time()  # Sets end time
                             # Sends data to the result function to create output
@@ -233,7 +235,6 @@ def server_mode():
                             data = count """
 
                             create_result('S', addr, start_time, end_time, data)  # replaces BYE with an empty string to remove it from data
-                            connected = False   # Connection false, stops the loop
                             break
     start_server()
 
@@ -245,8 +246,6 @@ def client_mode():
     server_addr = (server_ip, server_port)    # server_ip and port called addr to simply
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Defines socket with family and type
-
-
 
     packet = b"0" * 1000    # Packet to be sent defined as 1000 bytes
     send_time = int(args.time)            # Defined time as the time from user input
@@ -279,15 +278,14 @@ def client_mode():
             else:           # If there are not defined number, but time instead
                 print(f"Time = {send_time}")
                 total_bytes = 0
-                for sec in range(send_time, 0, -1): # Found in https://stackoverflow.com/questions/54426321/implementing-a-60-second-countdown-timer-in-a-print-statement-in-python
+                end_time = start_time + send_time
+                while time.time() < end_time:
                     sock.send(packet)
-                    start_time = time.time()
                     total_bytes += 1000
-                end_time = time.time()
                 
-            sock.send(b'BYE')
+            sock.sendall(b'BYE')
             server_msg = sock.recv(1024)
-            if server_msg.decode() == 'ACK:BYE':
+            if server_msg == b'ACK:BYE':
                 print("[SUCCESS] Server acknowledged BYE message")
                 create_result('C', client_addr, start_time, end_time, total_bytes)
             else:
