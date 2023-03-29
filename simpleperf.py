@@ -215,27 +215,26 @@ def server_mode():
                             break
                         data += part    # If there still is more parts, add them to data
 
-                bye_msg = re.search('BYE', data)    # Search with regex if the data contains BYE
-                if bye_msg is not None:    # if there is a BYE message. bye_msg is None if it was not found in data
-                    conn.send('ACK:BYE'.encode())   # Sends acknowledge to server when there is a bye message
-                    conn.close()    # Closes the connection
-                    end_time = time.time()  # Sets end time
-                    # Sends data to the result function to create output
+                        bye_msg = re.search('BYE', data)    # Search with regex if the data contains BYE
+                        if bye_msg is not None:    # if there is a BYE message. bye_msg is None if it was not found in data
+                            conn.send('ACK:BYE'.encode())   # Sends acknowledge to server when there is a bye message
+                            conn.close()    # Closes the connection
+                            end_time = time.time()  # Sets end time
+                            # Sends data to the result function to create output
 
-                # Convert data from a string of zeros to amount of bytes as an int before sending it to print results
-                data = len(data) - 3 
+                            # Convert data from a string of zeros to amount of bytes as an int before sending it to print results
+                            data = len(data) - 3 
 
-                """                             
-                count = 0
-                for zero in data:
-                    if zero == '0':
-                        count += 1
-                data = count """
+                            """                             
+                            count = 0
+                            for zero in data:
+                                if zero == '0':
+                                    count += 1
+                            data = count """
 
-                print(f"SENT TO CREATE RESULT: address: {addr}, start time: {start_time}, end time: {end_time}, data: {data}")
-                create_result('S', addr, start_time, end_time, data)  # replaces BYE with an empty string to remove it from data
-                connected = False   # Connection false, stops the loop
-                break
+                            create_result('S', addr, start_time, end_time, data)  # replaces BYE with an empty string to remove it from data
+                            connected = False   # Connection false, stops the loop
+                            break
     start_server()
 
 
