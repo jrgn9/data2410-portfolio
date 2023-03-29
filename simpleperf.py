@@ -178,8 +178,6 @@ def create_result(mode, addr, start_time, end_time, data):    # Function for cre
     print("")
 
 
-
-
 # FUNCTION FOR HANDLING THE SERVER MODE
 def server_mode():
     port = int(args.port)    # port from input
