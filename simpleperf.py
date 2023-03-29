@@ -141,26 +141,13 @@ def create_result(mode, addr, start_time, end_time, data):    # Function for cre
     port = addr[1]
     total_time = end_time - start_time
     mode = mode.upper()
-    rate = 0
+    
+    rate = ((data / total_time) / 1000000 ) * 8
 
-    # SETT RATE UTENFOR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-
-    # Regne ut om data skal ha B, KB eller MB ved %1000 og %1000000
     if args.format == 'MB':
-        data = float(data) / 1000000  # divides data with 1000000 and cast to int for value in MB
-        rate = (data / total_time) * 8     # divide data with total time to get Mbps
-        data = int(data)
-        formatted_data = str(data) + "MB"  # casts data to string and adds MB to the data string
+        data = data / 1000000
     elif args.format == 'KB':
-        data = float(data)/1000             # divides data with 1000 and cast to int for value in KB
-        rate = (data / total_time) * 8    # divide data with total time to get Mbps
-        data = int(data)
-        formatted_data = str(data) + "KB" # casts data to string and adds KB to the data string
-    else:   # 
-        data = float(data)
-        rate = ((data * 1000000) / total_time) * 8
-        data = int(data)    # To make sure data in formatted_data is an interger and not float
-        formatted_data = str(data) + "B"
+        data = data/1000             # divides data with 1000 and cast to int for value in KB
     
     # Table from PrettyTable
     result_table = PrettyTable()
@@ -171,7 +158,7 @@ def create_result(mode, addr, start_time, end_time, data):    # Function for cre
     else:
         print("Error in creating result: Wrong mode")
 
-    result_table.add_row([f"{ip}:{port}", f"0.0 - {round(total_time, 1)}", formatted_data, f"{round(rate, 2)} Mbps"])
+    result_table.add_row([f"{ip}:{port}", f"0.0 - {round(total_time, 1)}", f"{int(data)}{args.format}", f"{round(rate, 2)} Mbps"])
     # Løkke her for å få ut flere resultater
     result_table.add_row(["----------------","---------","--------","----------"])
     # OBS!!! MÅ HA EN SUMMARY PRINT TIL SLUTT - SE OPPGAVE
