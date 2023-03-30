@@ -120,7 +120,7 @@ def create_result(mode, addr, start_time, end_time, data):
     port = addr[1]
     total_time = end_time - start_time  # Calculates total time based on start and end time provided by client/server
     
-    rate = (data / total_time) * 8 / 1000000 # Calculate rate based on data and time provided. Multiplied by 8 for megabytes
+    rate = (data / total_time) * 8 / 1000000 # Calculate rate based on data and time provided. Multiply by 8 to convert to bits pr sec
 
     # If/else if to check if the format chosen is MB, KB or B. Then converts the data from byte to the correct format.
     if args.format == 'MB':
@@ -162,6 +162,7 @@ def server_mode():
     def handle_client(conn, addr):
         print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{server_ip}:{port}> \n")
         start_time = time.time()    # The start time for the connection
+        print(f"Start time: {start_time}")
         end_time = 0 # Declare end_time, to be used for later
         data = b''   # Sets data to be an empty byte object
         
@@ -175,6 +176,8 @@ def server_mode():
             #if bye_msg is not None:    # if there is a BYE message. bye_msg is None if it was not found in data
             #if b'BYE' in data:  # If there is BYE in bytes in the data
         end_time = time.time()  # Sets end time
+        print(f"End time: {end_time}")
+        print(f"Total time: {end_time - start_time}")
         conn.sendall(b'ACK:BYE')   # Sends acknowledge to server that there is a bye message
         conn.close()    # Closes the connection
         data = len(data) - 3    # Sets data to be the length of all the bytes. Subtract 3 for BYE message
@@ -251,8 +254,10 @@ def client_mode():
 
             print(f"Client connected with {server_ip} port {server_port} \n")
             start_time = time.time()    # Sets start time
+            print(f"Start time: {start_time}")
                          
             bytes = args.num    # Bytes are the number set in CLI
+            total_bytes = 0
             if bytes != None:    # If there are defined number of bytes to be sent
                 total_bytes = bytes # Sets how many bytes from start
                 while bytes > 0:    # As long as there are more bytes
@@ -263,12 +268,15 @@ def client_mode():
                     sock.send(packet)   # If there are > 1000 bytes, keep sending packets of 1000 bytes.
                     bytes -= 1000   # Subtract 1000 bytes from the amount given by user
                 end_time = time.time()  # Sets end time when the loop is done
+                print(f"End time: {end_time}")
+                print(f"Total time (data): {end_time - start_time}")
                 
             else:           # If there are not defined number, but time instead
                 end_time = start_time + send_time   # Defines end time as the start + time chosen by user
                 while time.time() < end_time:   # As long as the current time is less then the end time
                     sock.send(packet)   # Sends packets of 1000 bytes
                     total_bytes += 1000 # Adds 1000 bytes to the total amount of bytes sent
+                print(f"Total time (time): {end_time - start_time}")
             sock.sendall(b'BYE')    # Sends BYE message to server when the time is up
             create_result('C', client_addr, start_time, end_time, total_bytes)  # Calls the create result function with the data
             server_msg = sock.recv(1024)    # Recives message back from server
