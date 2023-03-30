@@ -185,26 +185,29 @@ def server_mode():
     def start_server():
         sock.listen()   # Socket listens for connections
         print(f"{line} \t A simpleperf server is listening on port {port} {line}")
-
-        # Set a timeout of 5 minutes for the server socket
-        sock.settimeout(300)
+       
+        sock.settimeout(300)     # Set a timeout of 5 minutes for the server socket
 
         while True:    # Runs as long as there is a connection
+            conn = None  # Initialize conn variable
             try:
                 conn, addr = sock.accept()  # Accepts connection for the incoming address
             except socket.timeout:
                 # If no clients connect in 5 minutes
                 print("[CONNECTION TIMEOUT] Closing connections...")
-                conn.close()
+                if conn:
+                    conn.close()
                 sys.exit(0)
             except KeyboardInterrupt:
                 # If the user hits ctrl+c, close the server socket and any open connections
                 print("[CLOSING CONNECTIONS] Goodbye!")
-                conn.close()
+                if conn:
+                    conn.close()
                 sys.exit(0)
             except: # If the server can't connect with the server. Prints error and close connection
                 print("[ERROR] Could not connect")
-                conn.close()
+                if conn:
+                    conn.close()
             else:   # If there are no errors
                 thread = threading.Thread(target=handle_client, args=(conn, addr))  # Creates new thread where target is the client function and sends the connection and address
                 thread.start()
