@@ -114,27 +114,6 @@ commonargs.add_argument('-f', '--format', type=str, choices=['B', 'KB', 'MB'], d
 # Variable for the user argument inputs
 args = parser.parse_args()
 
-""" 
-# ERROR HANDLING FOR WRONG FLAG AND MODE COMBINATIONS
-
-########## SERVER MODE OG BIND GIR FLAG COMBO ERROR NÅ!!!!!!!!!!!!!!!!!!!!!!
-if args.serverip != '127.0.0.1':
-    client_serverip = args.serverip
-if args.bind != '127.0.0.1':
-    bind = args.bind
-if args.time != 25:
-    client_time = args.time
-if args.parallel != 1:
-    parallel = args.parallel
-
-if ((args.client and bind) or (args.server and (client_serverip or client_time or args.interval or parallel or args.num))):
-    parser.print_help()
-    print("\n *****************************************************")
-    print("\n \n [FLAG ERROR] Wrong mode and flag combination! \n \n SEE THE HELP MENU ABOVE FOR FLAGS AND ARGUMENTS")
-    sys.exit()
-
- """
-
 # CREATES RESULTS AND PRINT TABLE - Based on what is sent from the server and client functions
 def create_result(mode, addr, start_time, end_time, data):
     ip = addr[0]    # Chooses index 0 and 1 from the address tupple to split ip and port
@@ -223,6 +202,12 @@ def server_mode():
 
 # FUNCTION FOR HANDLING THE CLIENT MODE
 def client_mode():
+
+    # checks if both -n and -t flags are present
+    if args.num is not None and args.time is not None:
+        print("[ERROR] -n and -t flags cannot be used at the same time!")
+        raise argparse.ArgumentError("")
+
     server_ip = args.serverip   # server_ip from input
     server_port= int(args.port)       # port from input
     server_addr = (server_ip, server_port)    # server_ip and port called addr to simply
@@ -290,3 +275,33 @@ elif args.server:   # If server flag is chosen
 elif args.client:   # If client flag is chosen
     print("[CLIENT MODE] Starting...")
     client_mode()   # Starts the client mode
+
+
+
+
+
+
+
+
+
+
+""" 
+# ERROR HANDLING FOR WRONG FLAG AND MODE COMBINATIONS
+
+########## SERVER MODE OG BIND GIR FLAG COMBO ERROR NÅ!!!!!!!!!!!!!!!!!!!!!!
+if args.serverip != '127.0.0.1':
+    client_serverip = args.serverip
+if args.bind != '127.0.0.1':
+    bind = args.bind
+if args.time != 25:
+    client_time = args.time
+if args.parallel != 1:
+    parallel = args.parallel
+
+if ((args.client and bind) or (args.server and (client_serverip or client_time or args.interval or parallel or args.num))):
+    parser.print_help()
+    print("\n *****************************************************")
+    print("\n \n [FLAG ERROR] Wrong mode and flag combination! \n \n SEE THE HELP MENU ABOVE FOR FLAGS AND ARGUMENTS")
+    sys.exit()
+
+ """
