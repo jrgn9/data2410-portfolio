@@ -136,33 +136,36 @@ if ((args.client and bind) or (args.server and (client_serverip or client_time o
  """
 
 # CREATES RESULTS AND PRINT TABLE - Based on what is sent from the server and client functions
-def create_result(mode, addr, start_time, end_time, data):    # Function for creating results
-    ip = addr[0]
+def create_result(mode, addr, start_time, end_time, data):
+    ip = addr[0]    # Chooses index 0 and 1 from the address tupple to split ip and port
     port = addr[1]
-    total_time = end_time - start_time
+    total_time = end_time - start_time  # Calculates total time based on start and end time provided by client/server
     
-    rate = ((data / total_time) / 1000000 ) * 8
+    rate = ((data / total_time) / 1000000 ) * 8 # Calculate rate based on data and time provided. Multiplied by 8 for megabytes
 
+    # If/else if to check if the format chosen is MB, KB or B. Then converts the data from byte to the correct format.
     if args.format == 'MB':
-        data = data / 1000000
+        data = data / 1000000        # divides data with 1000000 and cast to int for value in MB
     elif args.format == 'KB':
         data = data/1000             # divides data with 1000 and cast to int for value in KB
     
     # Table from PrettyTable
-    result_table = PrettyTable()
+    result_table = PrettyTable()    # Creates new table
+    # Checks if the mode invoked is from server or client. Different field names for the two modes.
     if mode == 'C':
         result_table.field_names = ["ID", "Interval", "Transfer", "Bandwith"]
     elif mode == 'S':
         result_table.field_names = ["ID", "Interval", "Recieved", "Rate"]
     else:
-        print("Error in creating result: Wrong mode")
+        print("Error in creating result: Wrong mode")   # Error in the edge case that there is no mode chosen (won't really happen)
 
+    # Adds row with all the data provided, with the right rounding and casting of data
     result_table.add_row([f"{ip}:{port}", f"0.0 - {round(total_time, 1)}", f"{int(data)}{args.format}", f"{round(rate, 2)} Mbps"])
-    # Løkke her for å få ut flere resultater
-    result_table.add_row(["----------------","---------","--------","----------"])
+    # LØKKE HER FOR Å FÅ UT FLERE RESULTATER
+    result_table.add_row(["----------------","---------","--------","----------"])  # Adds a line to split out the summary from all the results
     # OBS!!! MÅ HA EN SUMMARY PRINT TIL SLUTT - SE OPPGAVE
     result_table.add_row(["A summary", "will be", "printed", "here soon"])
-    print(result_table)
+    print(result_table) # Prints the table
     print("")
 
 
@@ -171,19 +174,19 @@ def server_mode():
     port = int(args.port)    # port from input
     server_ip = args.bind   #   server_ip from input
     addr = (server_ip, port) #    server_ip and port called addr to simply
-    print(f"Address: {addr}")
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Defines socket with family and type
     sock.bind(addr)     # Binds address to the socket
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # Sock option that allows for reuse of address
 
+    # Function for handling each client connecting to the server
     def handle_client(conn, addr):
         print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{server_ip}:{port}> \n")
         start_time = time.time()    # The start time for the connection
-        end_time = 0
-        data = b''   #Sets data to be an empty byte object
+        end_time = 0 # Declare end_time, to be used for later
+        data = b''   # Sets data to be an empty byte object
         
-        # Recieves byte in packet of 1000 bytes, then add them to data for total amount of bytes
+        # Recieves byte in packets of 1000 bytes, then add them to data for total amount of bytes
         while True:
             #OBS: HAR FJERNET TRY/EXCEPT/ELSE HER!!!
             part = conn.recv(1000)  # Recieves a request for 1000 bytes
@@ -191,14 +194,15 @@ def server_mode():
 
             #bye_msg = re.search(b'BYE', data)    # Search with regex if the data contains BYE
             #if bye_msg is not None:    # if there is a BYE message. bye_msg is None if it was not found in data
-            if b'BYE' in data:
+            if b'BYE' in data:  # If there is BYE in bytes in the data
                 end_time = time.time()  # Sets end time
-                conn.sendall(b'ACK:BYE')   # Sends acknowledge to server when there is a bye message
+                conn.sendall(b'ACK:BYE')   # Sends acknowledge to server that there is a bye message
                 conn.close()    # Closes the connection
-                data = len(data) - 3 
-                break
-        create_result('S', addr, start_time, end_time, data)  # replaces BYE with an empty string to remove it from data
+                data = len(data) - 3    # Sets data to be the length of all the bytes. Subtract 3 for BYE message
+                break   # Breaks the while loop
+        create_result('S', addr, start_time, end_time, data)  # Calls the function to create results and send all the data
 
+    # Function for starting the server
     def start_server():
         sock.listen()   # Socket listens for connections
         print(f"{line} \t A simpleperf server is listening on port {port} {line}")
@@ -206,18 +210,15 @@ def server_mode():
         while True:    # Runs as long as there is a connection
             try:
                 conn, addr = sock.accept()  # Accepts connection for the incoming address
-            except:
+            except: # If the server can't connect with the server. Prints error and close connection
                 print("[ERROR] Could not connect")
                 conn.close()
                 break
-            else:
-                thread = threading.Thread(target=handle_client, args=(conn, addr))  # Lager ny thread hvor target er handle funksjonen og den sender conn og addr som argumenter
-                thread.start()  # Starter ny thread
-                # Printer hvor mange connections som er aktive
-                # - 1 fordi listen vil alltid kjøre som en thread før noen har koblet til
-                print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1} \n") 
+            else:   # If there are no errors
+                thread = threading.Thread(target=handle_client, args=(conn, addr))  # Creates new thread where target is the client function and sends the connection and address
+                print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1} \n") # Prints how many active connections there are. -1 because listen always run as a thread.
 
-    start_server()
+    start_server()  # Starts the server when invoked
 
 
 # FUNCTION FOR HANDLING THE CLIENT MODE
@@ -231,53 +232,55 @@ def client_mode():
     packet = b"0" * 1000    # Packet to be sent defined as 1000 bytes
     send_time = int(args.time)            # Defined time as the time from user input
 
+    # Function for starting the client
     def start_client():
         print(f"{line} A simpleperf client connecting to server {server_ip}, port {server_port} {line}")
-        try:
+        try:    # Tries to connect to the server address
             sock.connect(server_addr)
-        except:
+        except: # Prints error if it can't connect to server
             print("[ERROR] Could not connect, please try again")
-        else:
+        else:   # If there are no errors
+            # Declares the client address
             client_ip = sock.getsockname()[0]
             client_port = sock.getsockname()[1]
             client_addr = (client_ip, client_port)
 
             print(f"Client connected with {server_ip} port {server_port} \n")
-            start_time = time.time()
-            bytes = args.num
+            start_time = time.time()    # Sets start time
+            bytes = args.num    # Bytes are the number set in CLI
             if bytes != None:    # If there are defined number of bytes to be sent
-                total_bytes = bytes
-                while bytes:
-                    if bytes < 1000:
-                        sock.send(b"0" * bytes)
-                        break
-                    sock.send(packet)
-                    bytes -= 1000
-                end_time = time.time()
+                total_bytes = bytes # Sets how many bytes from start
+                while bytes:    # As long as there are more bytes
+                    if bytes < 1000:    # If there is less than 1000 bytes
+                        sock.send(b"0" * bytes) # Sends bytes as 0 as many times as there are bytes left
+                        break   # Ends the loop
+                    sock.send(packet)   # If there are > 1000 bytes, keep sending packets of 1000 bytes.
+                    bytes -= 1000   # Subtract 1000 bytes from the amount given by user
+                end_time = time.time()  # Sets end time when the loop is done
                 
             else:           # If there are not defined number, but time instead
-                total_bytes = 0
-                end_time = start_time + send_time
-                while time.time() < end_time:
-                    sock.send(packet)
-                    total_bytes += 1000
-            sock.sendall(b'BYE')
-            server_msg = sock.recv(1024)
-            create_result('C', client_addr, start_time, end_time, total_bytes)
-            if server_msg == b'ACK:BYE':
-                print("[SUCCESS] Server acknowledged BYE message \n")
+                total_bytes = 0 # Declares total bytes to be used for later
+                end_time = start_time + send_time   # Defines end time as the start + time chosen by user
+                while time.time() < end_time:   # As long as the current time is less then the end time
+                    sock.send(packet)   # Sends packets of 1000 bytes
+                    total_bytes += 1000 # Adds 1000 bytes to the total amount of bytes sent
+            sock.sendall(b'BYE')    # Sends BYE message to server when the time is up
+            server_msg = sock.recv(1024)    # Recives message back from server
+            create_result('C', client_addr, start_time, end_time, total_bytes)  # Calls the create result function with the data
+            if server_msg == b'ACK:BYE':    # If the server has acknowledged the BYE message
+                print("[SUCCESS] Server acknowledged BYE message \n")   # Print message to show that it succeeded
                 #create_result('C', client_addr, start_time, end_time, total_bytes)
             else:
-                print("[ERROR] Unexpected response from server")
-            sock.close()
+                print("[ERROR] Unexpected response from server")    # Prints error if there is no response/wrong response from server
+            sock.close()    # Closes the connection when done
 
-    start_client()
+    start_client()  # Starts the client when invoked
 
 
 # INVOKING CLIENT OR SERVER MODE
 #Gives error if both or none of the mode flags are chosen
 if ((not args.server and not args.client) or (args.server and args.client)):
-    parser.print_help()
+    parser.print_help() # If not server/client or both are invoked it prints the help screen, then an error message, then exits
     print(line)
     print("[ERROR] you must run either in server or client mode \n \nSEE THE HELP MENU ABOVE FOR FLAGS AND ARGUMENTS \n")
     sys.exit()
