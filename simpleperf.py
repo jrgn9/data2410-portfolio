@@ -186,9 +186,24 @@ def server_mode():
         sock.listen()   # Socket listens for connections
         print(f"{line} \t A simpleperf server is listening on port {port} {line}")
 
+        # Set a timeout of 5 minutes for the server socket
+        sock.settimeout(300)
+
         while True:    # Runs as long as there is a connection
             try:
                 conn, addr = sock.accept()  # Accepts connection for the incoming address
+            except socket.timeout:
+                # If no clients connect in 5 minutes
+                print("[CONNECTION TIMEOUT] Closing connections...")
+                sys.exit(0)
+                conn.close()
+                break
+            except KeyboardInterrupt:
+                # If the user hits ctrl+c, close the server socket and any open connections
+                print("[CLOSING CONNECTIONS] Goodbye!")
+                sys.exit(0)
+                conn.close()
+                break
             except: # If the server can't connect with the server. Prints error and close connection
                 print("[ERROR] Could not connect")
                 conn.close()
@@ -204,9 +219,12 @@ def server_mode():
 def client_mode():
 
     # checks if both -n and -t flags are present
-    if args.num is not None and args.time is not None:
-        print("[ERROR] -n and -t flags cannot be used at the same time!")
-        raise argparse.ArgumentError("")
+    if (args.num is not None) and (args.time is not None and args.time != 25):
+        parser.print_help()
+        print(line)
+        error_msg = "-n and -t flags cannot be used at the same time!"
+        print(f"[ERROR] {error_msg}")
+        raise argparse.ArgumentError(None, error_msg)
 
     server_ip = args.serverip   # server_ip from input
     server_port= int(args.port)       # port from input
