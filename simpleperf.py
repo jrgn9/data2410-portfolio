@@ -26,7 +26,6 @@ def check_ip(ip_address):
         print(f'[INVALID IP] The IP address \'{ip_address}\' is not a valid address!')  # Prints error message
         raise argparse.ArgumentError("")    # raises an ArgumentError in argparse
     else:   # If there are no ValueError:
-        print(f"[SUCCESS] The IP address {valid} is valid")
         return ip_address
 
 # Checks if a port is between 1024 and 65535
@@ -38,7 +37,6 @@ def check_port(port):
     
     else:   # If port can be cast to an int
         if (value >= 1024 and value <= 65535):    # If the port has the valid values
-            print("[SUCCESS] port value is valid")
             return value
         else:   # Gives an error if the port is out of range
             print("[VALUE ERROR] Expected port between 1024 and 65535")
@@ -155,10 +153,10 @@ def handle_client(conn, addr, server_ip, port):
     recv_bytes = 0
 
     while True:
-        data = conn.recv(1000).decode()
+        data = conn.recv(1000)
         if not data:
             break
-        if 'BYE' in data:
+        if b'BYE' in data:
             recv_bytes += len(data) - len(b'BYE')  # Subtract the length of the 'BYE' message
             conn.send(b'ACK:BYE')
             break
@@ -246,14 +244,16 @@ def start_client(sock, server_ip, port):
                 sock.send(packet)   # If there are > 1000 bytes, keep sending packets of 1000 bytes.
                 bytes -= 1000   # Subtract 1000 bytes from the amount given by user
             end_time = time.time()  # Sets end time when the loop is done
+            sock.send(b'BYE')   # Send the BYE message after sending the specified amount of data
             
         else:           # If there are not defined number, but time instead
             end_time = start_time + send_time   # Defines end time as the start + time chosen by user
             while time.time() < end_time:   # As long as the current time is less then the end time
                 if time.time() > end_time - 0.001:  # Checks if it is enough time to send the last packet
-                    packet += b'BYE'    # Sendt BYE message to server right before the time is up
+                    remaining_bytes = int((end_time - time.time()) * 1000)  # Calculate remaining bytes to send
+                    packet = b'0' * remaining_bytes + b'BYE'    # Send BYE message and remaining_bytes to server right before the time is up
                 sock.send(packet)   # Sends packets of 1000 bytes
-                total_bytes += 1000 # Adds 1000 bytes to the total amount of bytes sent
+                total_bytes += len(packet) # Adds length of packet to the total amount of bytes sent
 
         create_result('C', client_addr, start_time, end_time, total_bytes)  # Calls the create result function with the data
         server_msg = sock.recv(1024)    # Recives message back from server
