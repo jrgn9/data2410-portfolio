@@ -145,7 +145,7 @@ def create_result(mode, addr, start_time, end_time, data):
     print(result_table) # Prints the table
     print("")
 
-# Function for handling each client connecting to the server
+# FUNCTION FOR HANDLING EACH CLIENT CONNECTING TO THE SERVER
 def handle_client(conn, addr, server_ip, port):
     print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{server_ip}:{port}> \n")
     start_time = time.time()    # The start time for the connection
@@ -180,7 +180,7 @@ def start_server(sock, server_ip, port):
             conn, addr = sock.accept()  # Accepts connection for the incoming address
         except socket.timeout:
             # If no clients connect in 5 minutes
-            print("[CONNECTION TIMEOUT] Closing connections...")
+            print("[CONNECTION TIMEOUT] Timeout due to inactivity. Closing connections...")
             if conn:
                 conn.close()
             sys.exit(0)
@@ -300,7 +300,13 @@ elif args.client:   # If client flag is chosen
     client_mode()   # Starts the client mode
 
 
-
+# TODO:
+    # CHECK FOR ERROR HANDLING - TRY/EXCEPT
+    # COMMENT THE NEWLY ADDED LINES
+    # MAYBE DO THE FLAG COMBINATION ERROR HANDLING
+    # IMPLEMENT INTERVAL MODE
+    # IMPLEMENT PARALLEL MODE
+    # CREATE SUMMARY IN THE PRINTED RESULTS
 
 
 
