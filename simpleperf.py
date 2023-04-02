@@ -156,7 +156,10 @@ def handle_client(conn, addr, server_ip, port):
 
     while True:
         data = conn.recv(1000).decode()
-        if 'BYE' in data or not data:
+        if not data:
+            break
+        if 'BYE' in data:
+            recv_bytes += len(data) - len(b'BYE')  # Subtract the length of the 'BYE' message
             conn.send(b'ACK:BYE')
             break
         else:
@@ -247,15 +250,15 @@ def start_client(sock, server_ip, port):
         else:           # If there are not defined number, but time instead
             end_time = start_time + send_time   # Defines end time as the start + time chosen by user
             while time.time() < end_time:   # As long as the current time is less then the end time
+                if time.time() > end_time - 0.001:  # Checks if it is enough time to send the last packet
+                    packet += b'BYE'    # Sendt BYE message to server right before the time is up
                 sock.send(packet)   # Sends packets of 1000 bytes
                 total_bytes += 1000 # Adds 1000 bytes to the total amount of bytes sent
 
-        sock.sendall(b'BYE')    # Sends BYE message to server when the time is up
         create_result('C', client_addr, start_time, end_time, total_bytes)  # Calls the create result function with the data
         server_msg = sock.recv(1024)    # Recives message back from server
         if server_msg == b'ACK:BYE':    # If the server has acknowledged the BYE message
             print("[SUCCESS] Server acknowledged BYE message \n")   # Print message to show that it succeeded
-            #create_result('C', client_addr, start_time, end_time, total_bytes)
         else:
             print("[ERROR] Unexpected response from server")    # Prints error if there is no response/wrong response from server
         sock.close()    # Closes the connection when done
