@@ -249,9 +249,13 @@ def start_client(sock, server_ip, port):
         else:           # If there are not defined number, but time instead
             end_time = start_time + send_time   # Defines end time as the start + time chosen by user
             while time.time() < end_time:   # As long as the current time is less then the end time
-                if time.time() > end_time - 0.001:  # Checks if it is enough time to send the last packet
-                    remaining_bytes = int((end_time - time.time()) * 1000)  # Calculate remaining bytes to send
+                remaining_time = end_time - time.time() # Defines how long is remaining
+                if remaining_time < 0.001:  # Checks if it is enough time to send the last packet
+                    remaining_bytes = int((remaining_time * 1000))  # Calculate remaining bytes to send
                     packet = b'0' * remaining_bytes + b'BYE'    # Send BYE message and remaining_bytes to server right before the time is up
+                    sock.send(packet)
+                    total_bytes += len(packet)
+                    break
                 sock.send(packet)   # Sends packets of 1000 bytes
                 total_bytes += len(packet) # Adds length of packet to the total amount of bytes sent
 
