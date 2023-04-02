@@ -147,6 +147,58 @@ def create_result(mode, addr, start_time, end_time, data):
     print(result_table) # Prints the table
     print("")
 
+# Function for handling each client connecting to the server
+def handle_client(conn, addr, server_ip, port):
+    print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{server_ip}:{port}> \n")
+    start_time = time.time()    # The start time for the connection
+    print(f"Start time: {start_time}")
+    end_time = 0 # Declare end_time, to be used for later
+    recv_bytes = 0
+
+    while True:
+        data = conn.recv(1000).decode()
+        if 'BYE' in data or not data:
+            conn.send(b'ACK:BYE')
+            break
+        else:
+            recv_bytes += len(data)
+
+    end_time = time.time()  # Sets end time
+    conn.close()    # Closes the connection
+    create_result('S', addr, start_time, end_time, recv_bytes)  # Calls the function to create results and send all the data
+
+# Function for starting the server
+def start_server(sock, server_ip, port):
+    sock.listen()   # Socket listens for connections
+    print(f"{line} \t A simpleperf server is listening on port {port} {line}")
+    
+    sock.settimeout(300)     # Set a timeout of 5 minutes for the server socket
+
+    while True:    # Runs as long as there is a connection
+        conn = None  # Initialize conn variable
+        try:
+            conn, addr = sock.accept()  # Accepts connection for the incoming address
+        except socket.timeout:
+            # If no clients connect in 5 minutes
+            print("[CONNECTION TIMEOUT] Closing connections...")
+            if conn:
+                conn.close()
+            sys.exit(0)
+        except KeyboardInterrupt:
+            # If the user hits ctrl+c, close the server socket and any open connections
+            print("[CLOSING CONNECTIONS] Goodbye!")
+            if conn:
+                conn.close()
+            sys.exit(0)
+        except: # If the server can't connect with the server. Prints error and close connection
+            print("[ERROR] Could not connect")
+            if conn:
+                conn.close()
+        else:   # If there are no errors
+            thread = threading.Thread(target=handle_client, args=(conn, addr, server_ip, port))  # Creates new thread where target is the client function and sends the connection and address
+            thread.start()
+            print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1} \n") # Prints how many active connections there are. -1 because listen always run as a thread.
+
 
 # FUNCTION FOR HANDLING THE SERVER MODE
 def server_mode():
@@ -156,66 +208,63 @@ def server_mode():
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Defines socket with family and type
     sock.bind(addr)     # Binds address to the socket
-    #sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # Sock option that allows for reuse of address
 
-    # Function for handling each client connecting to the server
-    def handle_client(conn, addr):
-        print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{server_ip}:{port}> \n")
-        start_time = time.time()    # The start time for the connection
+    start_server(sock, server_ip, port)  # Starts the server when invoked
+
+
+# FUNCTION FOR STARTING THE CLIENT
+def start_client(sock, server_ip, port):
+    server_addr = (server_ip, port)
+    send_time = int(args.time)            # Defined time as the time from user input
+    packet = b"0" * 1000    # Packet to be sent defined as 1000 bytes
+
+    print(f"{line} A simpleperf client connecting to server {server_ip}, port {server_port} {line}")
+    
+    try:    # Tries to connect to the server address
+        sock.connect(server_addr)
+    except: # Prints error if it can't connect to server
+        print("[ERROR] Could not connect, please try again")
+    else:   # If there are no errors
+        # Declares the client address
+        client_ip = sock.getsockname()[0]
+        client_port = sock.getsockname()[1]
+        client_addr = (client_ip, client_port)
+
+        print(f"Client connected with {server_ip} port {server_port} \n")
+        start_time = time.time()    # Sets start time
         print(f"Start time: {start_time}")
-        end_time = 0 # Declare end_time, to be used for later
-        recv_bytes = 0
-
-        while True:
-            data = conn.recv(1000).decode()
-            if 'BYE' in data or not data:
-                conn.send(b'ACK:BYE')
-                break
-            else:
-                recv_bytes += len(data)
-
-        end_time = time.time()  # Sets end time
-        conn.close()    # Closes the connection
-        create_result('S', addr, start_time, end_time, recv_bytes)  # Calls the function to create results and send all the data
-
-    # Function for starting the server
-    def start_server():
-        sock.listen()   # Socket listens for connections
-        print(f"{line} \t A simpleperf server is listening on port {port} {line}")
-       
-        sock.settimeout(300)     # Set a timeout of 5 minutes for the server socket
-
-        while True:    # Runs as long as there is a connection
-            conn = None  # Initialize conn variable
-            try:
-                conn, addr = sock.accept()  # Accepts connection for the incoming address
-            except socket.timeout:
-                # If no clients connect in 5 minutes
-                print("[CONNECTION TIMEOUT] Closing connections...")
-                if conn:
-                    conn.close()
-                sys.exit(0)
-            except KeyboardInterrupt:
-                # If the user hits ctrl+c, close the server socket and any open connections
-                print("[CLOSING CONNECTIONS] Goodbye!")
-                if conn:
-                    conn.close()
-                sys.exit(0)
-            except: # If the server can't connect with the server. Prints error and close connection
-                print("[ERROR] Could not connect")
-                if conn:
-                    conn.close()
-            else:   # If there are no errors
-                thread = threading.Thread(target=handle_client, args=(conn, addr))  # Creates new thread where target is the client function and sends the connection and address
-                thread.start()
-                print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1} \n") # Prints how many active connections there are. -1 because listen always run as a thread.
-
-    start_server()  # Starts the server when invoked
+                        
+        bytes = args.num    # Bytes are the number set in CLI
+        total_bytes = 0
+        if bytes != None:    # If there are defined number of bytes to be sent
+            total_bytes = bytes # Sets how many bytes from start
+            while bytes > 0:    # As long as there are more bytes
+                if bytes < 1000:    # If there is less than 1000 bytes
+                    sock.send(b"0" * bytes) # Sends bytes as 0 as many times as there are bytes left
+                    bytes = 0
+                sock.send(packet)   # If there are > 1000 bytes, keep sending packets of 1000 bytes.
+                bytes -= 1000   # Subtract 1000 bytes from the amount given by user
+            end_time = time.time()  # Sets end time when the loop is done
+            
+        else:           # If there are not defined number, but time instead
+            end_time = start_time + send_time   # Defines end time as the start + time chosen by user
+            while time.time() < end_time:   # As long as the current time is less then the end time
+                sock.send(packet)   # Sends packets of 1000 bytes
+                total_bytes += 1000 # Adds 1000 bytes to the total amount of bytes sent
+                
+        sock.sendall(b'BYE')    # Sends BYE message to server when the time is up
+        create_result('C', client_addr, start_time, end_time, total_bytes)  # Calls the create result function with the data
+        server_msg = sock.recv(1024)    # Recives message back from server
+        if server_msg == b'ACK:BYE':    # If the server has acknowledged the BYE message
+            print("[SUCCESS] Server acknowledged BYE message \n")   # Print message to show that it succeeded
+            #create_result('C', client_addr, start_time, end_time, total_bytes)
+        else:
+            print("[ERROR] Unexpected response from server")    # Prints error if there is no response/wrong response from server
+        sock.close()    # Closes the connection when done
 
 
 # FUNCTION FOR HANDLING THE CLIENT MODE
 def client_mode():
-
     # checks if both -n and -t flags are present
     if (args.num is not None) and (args.time is not None and args.time != 25):
         parser.print_help()
@@ -226,62 +275,9 @@ def client_mode():
 
     server_ip = args.serverip   # server_ip from input
     server_port= int(args.port)       # port from input
-    server_addr = (server_ip, server_port)    # server_ip and port called addr to simply
-
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Defines socket with family and type
 
-    packet = b"0" * 1000    # Packet to be sent defined as 1000 bytes
-    send_time = int(args.time)            # Defined time as the time from user input
-
-    # Function for starting the client
-    def start_client():
-        print(f"{line} A simpleperf client connecting to server {server_ip}, port {server_port} {line}")
-        try:    # Tries to connect to the server address
-            sock.connect(server_addr)
-        except: # Prints error if it can't connect to server
-            print("[ERROR] Could not connect, please try again")
-        else:   # If there are no errors
-            # Declares the client address
-            client_ip = sock.getsockname()[0]
-            client_port = sock.getsockname()[1]
-            client_addr = (client_ip, client_port)
-
-            print(f"Client connected with {server_ip} port {server_port} \n")
-            start_time = time.time()    # Sets start time
-            print(f"Start time: {start_time}")
-                         
-            bytes = args.num    # Bytes are the number set in CLI
-            total_bytes = 0
-            if bytes != None:    # If there are defined number of bytes to be sent
-                total_bytes = bytes # Sets how many bytes from start
-                while bytes > 0:    # As long as there are more bytes
-                    if bytes < 1000:    # If there is less than 1000 bytes
-                        sock.send(b"0" * bytes) # Sends bytes as 0 as many times as there are bytes left
-                        bytes = 0
-                        #break   # Ends the loop
-                    sock.send(packet)   # If there are > 1000 bytes, keep sending packets of 1000 bytes.
-                    bytes -= 1000   # Subtract 1000 bytes from the amount given by user
-                end_time = time.time()  # Sets end time when the loop is done
-                print(f"End time: {end_time}")
-                print(f"Total time (data): {end_time - start_time}")
-                
-            else:           # If there are not defined number, but time instead
-                end_time = start_time + send_time   # Defines end time as the start + time chosen by user
-                while time.time() < end_time:   # As long as the current time is less then the end time
-                    sock.send(packet)   # Sends packets of 1000 bytes
-                    total_bytes += 1000 # Adds 1000 bytes to the total amount of bytes sent
-                print(f"Total time (time): {end_time - start_time}")
-            sock.sendall(b'BYE')    # Sends BYE message to server when the time is up
-            create_result('C', client_addr, start_time, end_time, total_bytes)  # Calls the create result function with the data
-            server_msg = sock.recv(1024)    # Recives message back from server
-            if server_msg == b'ACK:BYE':    # If the server has acknowledged the BYE message
-                print("[SUCCESS] Server acknowledged BYE message \n")   # Print message to show that it succeeded
-                #create_result('C', client_addr, start_time, end_time, total_bytes)
-            else:
-                print("[ERROR] Unexpected response from server")    # Prints error if there is no response/wrong response from server
-            sock.close()    # Closes the connection when done
-
-    start_client()  # Starts the client when invoked
+    start_client(sock, server_ip, server_port)  # Starts the client when invoked
 
 
 # INVOKING CLIENT OR SERVER MODE
