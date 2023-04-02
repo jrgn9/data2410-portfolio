@@ -151,7 +151,6 @@ def create_result(mode, addr, start_time, end_time, data):
 def handle_client(conn, addr, server_ip, port):
     print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{server_ip}:{port}> \n")
     start_time = time.time()    # The start time for the connection
-    print(f"Start time: {start_time}")
     end_time = 0 # Declare end_time, to be used for later
     recv_bytes = 0
 
@@ -218,7 +217,7 @@ def start_client(sock, server_ip, port):
     send_time = int(args.time)            # Defined time as the time from user input
     packet = b"0" * 1000    # Packet to be sent defined as 1000 bytes
 
-    print(f"{line} A simpleperf client connecting to server {server_ip}, port {server_port} {line}")
+    print(f"{line} A simpleperf client connecting to server {server_ip}, port {port} {line}")
     
     try:    # Tries to connect to the server address
         sock.connect(server_addr)
@@ -230,9 +229,8 @@ def start_client(sock, server_ip, port):
         client_port = sock.getsockname()[1]
         client_addr = (client_ip, client_port)
 
-        print(f"Client connected with {server_ip} port {server_port} \n")
+        print(f"Client connected with {server_ip} port {port} \n")
         start_time = time.time()    # Sets start time
-        print(f"Start time: {start_time}")
                         
         bytes = args.num    # Bytes are the number set in CLI
         total_bytes = 0
@@ -251,7 +249,7 @@ def start_client(sock, server_ip, port):
             while time.time() < end_time:   # As long as the current time is less then the end time
                 sock.send(packet)   # Sends packets of 1000 bytes
                 total_bytes += 1000 # Adds 1000 bytes to the total amount of bytes sent
-                
+
         sock.sendall(b'BYE')    # Sends BYE message to server when the time is up
         create_result('C', client_addr, start_time, end_time, total_bytes)  # Calls the create result function with the data
         server_msg = sock.recv(1024)    # Recives message back from server
