@@ -164,25 +164,19 @@ def server_mode():
         start_time = time.time()    # The start time for the connection
         print(f"Start time: {start_time}")
         end_time = 0 # Declare end_time, to be used for later
-        data = b''   # Sets data to be an empty byte object
-        
-        # Recieves byte in packets of 1000 bytes, then add them to data for total amount of bytes
-        while not b'BYE' in data:
-            #OBS: HAR FJERNET TRY/EXCEPT/ELSE HER!!!
-            part = conn.recv(1000)  # Recieves a request for 1000 bytes
-            data += part    # If there still is more parts, add them to data
+        recv_bytes = 0
 
-            #bye_msg = re.search(b'BYE', data)    # Search with regex if the data contains BYE
-            #if bye_msg is not None:    # if there is a BYE message. bye_msg is None if it was not found in data
-            #if b'BYE' in data:  # If there is BYE in bytes in the data
+        while True:
+            data = conn.recv(1000).decode()
+            if 'BYE' in data or not data:
+                conn.send(b'ACK:BYE')
+                break
+            else:
+                recv_bytes += len(data)
+
         end_time = time.time()  # Sets end time
-        print(f"End time: {end_time}")
-        print(f"Total time: {end_time - start_time}")
-        conn.sendall(b'ACK:BYE')   # Sends acknowledge to server that there is a bye message
         conn.close()    # Closes the connection
-        data = len(data) - 3    # Sets data to be the length of all the bytes. Subtract 3 for BYE message
-                #break   # Breaks the while loop
-        create_result('S', addr, start_time, end_time, data)  # Calls the function to create results and send all the data
+        create_result('S', addr, start_time, end_time, recv_bytes)  # Calls the function to create results and send all the data
 
     # Function for starting the server
     def start_server():
