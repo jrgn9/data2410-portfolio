@@ -153,15 +153,20 @@ def handle_client(conn, addr, server_ip, port):
     recv_bytes = 0  # Declare recieved bytes
 
     while True: # Infinite loop
-        data = conn.recv(1000)  # Sets data as recieved data from client
-        if not data:    # Stops if there are no more data
-            break
-        if b'BYE' in data:  # If there is a BYE message in data
-            recv_bytes += len(data) - len(b'BYE')  # Subtract the length of the 'BYE' message
-            conn.send(b'ACK:BYE')   # Sends ACK BYE back to client
-            break
-        else:   # If there are data and no BYE message
-            recv_bytes += len(data) # Adds the length of the recieved bytes to the variable
+        try:    # Tries to recive data from client
+            data = conn.recv(1000)  # Sets data as recieved data from client
+        except:
+            print("[ERROR] Could not recive data from client. Connection closed")
+            conn.close()
+        else:   # If there are no errors
+            if not data:    # Stops if there are no more data
+                break
+            if b'BYE' in data:  # If there is a BYE message in data
+                recv_bytes += len(data) - len(b'BYE')  # Subtract the length of the 'BYE' message
+                conn.send(b'ACK:BYE')   # Sends ACK BYE back to client
+                break
+            else:   # If there are data and no BYE message
+                recv_bytes += len(data) # Adds the length of the recieved bytes to the variable
 
     end_time = time.time()  # Sets end time
     conn.close()    # Closes the connection
@@ -301,11 +306,11 @@ elif args.client:   # If client flag is chosen
 
 
 # TODO:
-    # CHECK FOR ERROR HANDLING - TRY/EXCEPT
-    # MAYBE DO THE FLAG COMBINATION ERROR HANDLING
     # IMPLEMENT INTERVAL MODE
     # IMPLEMENT PARALLEL MODE
     # CREATE SUMMARY IN THE PRINTED RESULTS
+
+    # MAYBE DO THE FLAG COMBINATION ERROR HANDLING
 
 
 
