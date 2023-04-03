@@ -246,7 +246,11 @@ def start_client(sock, server_ip, port):
         total_bytes = 0 # declares total bytes
 
         # Declares variables for interval flag:
-        interval = int(args.interval)
+        if args.interval is not None:   # Checks if a interval is set
+            interval = int(args.interval)
+        else:
+            interval = None
+
         interval_start = start_time
         interval_bytes = 0
 
@@ -310,9 +314,12 @@ def start_client(sock, server_ip, port):
 def client_mode():
     server_ip = args.serverip   # server_ip from input
     server_port= int(args.port)       # port from input
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Defines socket with family and type
 
-    start_client(sock, server_ip, server_port)  # Starts the client when invoked
+    print(args.parallel)
+    for clients in range(0, int(args.parallel)):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Defines socket with family and type
+        thread = threading.Thread(target=start_client, args=(sock, server_ip, server_port))  # Starts the client when invoked
+        thread.start()
 
 
 # INVOKING CLIENT OR SERVER MODE
