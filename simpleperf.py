@@ -150,18 +150,18 @@ def handle_client(conn, addr, server_ip, port):
     print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{server_ip}:{port}> \n")
     start_time = time.time()    # The start time for the connection
     end_time = 0 # Declare end_time, to be used for later
-    recv_bytes = 0
+    recv_bytes = 0  # Declare recieved bytes
 
-    while True:
-        data = conn.recv(1000)
-        if not data:
+    while True: # Infinite loop
+        data = conn.recv(1000)  # Sets data as recieved data from client
+        if not data:    # Stops if there are no more data
             break
-        if b'BYE' in data:
+        if b'BYE' in data:  # If there is a BYE message in data
             recv_bytes += len(data) - len(b'BYE')  # Subtract the length of the 'BYE' message
-            conn.send(b'ACK:BYE')
+            conn.send(b'ACK:BYE')   # Sends ACK BYE back to client
             break
-        else:
-            recv_bytes += len(data)
+        else:   # If there are data and no BYE message
+            recv_bytes += len(data) # Adds the length of the recieved bytes to the variable
 
     end_time = time.time()  # Sets end time
     conn.close()    # Closes the connection
@@ -252,9 +252,9 @@ def start_client(sock, server_ip, port):
                 remaining_time = end_time - time.time() # Defines how long is remaining
                 if remaining_time < 0.001:  # Checks if it is enough time to send the last packet
                     remaining_bytes = int((remaining_time * 1000))  # Calculate remaining bytes to send
-                    packet = b'0' * remaining_bytes + b'BYE'    # Send BYE message and remaining_bytes to server right before the time is up
-                    sock.send(packet)
-                    total_bytes += len(packet)
+                    packet = b'0' * remaining_bytes + b'BYE'    # creates a packet of remaining bytes and BYE message
+                    sock.send(packet)   # Sends packet before time is up
+                    total_bytes += len(packet)  # Adds lenggth to total bytes
                     break
                 sock.send(packet)   # Sends packets of 1000 bytes
                 total_bytes += len(packet) # Adds length of packet to the total amount of bytes sent
@@ -271,8 +271,8 @@ def start_client(sock, server_ip, port):
 # FUNCTION FOR HANDLING THE CLIENT MODE
 def client_mode():
     # checks if both -n and -t flags are present
-    if (args.num is not None) and (args.time is not None and args.time != 25):
-        parser.print_help()
+    if (args.num is not None) and (args.time is not None and args.time != 25):  # A problem with this aproach is if the user specifies -t 25 and -n
+        parser.print_help() # Prints help text
         print(line)
         error_msg = "-n and -t flags cannot be used at the same time!"
         print(f"[ERROR] {error_msg}")
@@ -302,7 +302,6 @@ elif args.client:   # If client flag is chosen
 
 # TODO:
     # CHECK FOR ERROR HANDLING - TRY/EXCEPT
-    # COMMENT THE NEWLY ADDED LINES
     # MAYBE DO THE FLAG COMBINATION ERROR HANDLING
     # IMPLEMENT INTERVAL MODE
     # IMPLEMENT PARALLEL MODE
