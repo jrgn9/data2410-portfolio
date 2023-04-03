@@ -144,7 +144,7 @@ def create_result(mode, addr, start_time, interval_start, elapsed_time, data, in
         interval_str = f"0.0 - {round(elapsed_time, 1)}"
 
     # Adds row with all the data provided, with the right rounding and casting of data
-    result_table.add_row([f"{ip}:{port}", interval_str, f"{data}{args.format}", f"{round(rate, 2)} Mbps"])
+    result_table.add_row([f"{ip}:{port}", interval_str, f"{data}{args.format}", "%.2f Mbps" % rate])
     print(result_table)
     print("")
 
@@ -297,7 +297,7 @@ def start_client(sock, server_ip, port):
                     interval_bytes = 0
 
         total_elapsed_time = end_time - start_time
-        create_result('C', client_addr, start_time, total_elapsed_time, start_time, total_bytes)  # Calls the create result function with the data
+        create_result('C', client_addr, start_time, interval_start, total_elapsed_time, total_bytes, False)  # Calls the create result function with the data
         server_msg = sock.recv(1024)    # Recives message back from server
         if server_msg == b'ACK:BYE':    # If the server has acknowledged the BYE message
             print("[SUCCESS] Server acknowledged BYE message \n")   # Print message to show that it succeeded
