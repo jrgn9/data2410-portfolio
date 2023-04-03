@@ -315,7 +315,7 @@ def client_mode():
     server_ip = args.serverip   # server_ip from input
     server_port= int(args.port)       # port from input
 
-    print(args.parallel)
+    # For loop that create client threads for each parallel flag set
     for clients in range(0, int(args.parallel)):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Defines socket with family and type
         thread = threading.Thread(target=start_client, args=(sock, server_ip, server_port))  # Starts the client when invoked
@@ -335,7 +335,3 @@ elif args.server:   # If server flag is chosen
 elif args.client:   # If client flag is chosen
     print("[CLIENT MODE] Starting...")
     client_mode()   # Starts the client mode
-
-
-# TODO:
-    # IMPLEMENT PARALLEL MODE
