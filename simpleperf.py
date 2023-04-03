@@ -308,14 +308,6 @@ def start_client(sock, server_ip, port):
 
 # FUNCTION FOR HANDLING THE CLIENT MODE
 def client_mode():
-    # checks if both -n and -t flags are present
-    if (args.num is not None) and (args.time is not None and args.time != 25):  # A problem with this aproach is if the user specifies -t 25 and -n
-        parser.print_help() # Prints help text
-        print(line)
-        error_msg = "-n and -t flags cannot be used at the same time!"
-        print(f"[ERROR] {error_msg}")
-        raise argparse.ArgumentError(None, error_msg)
-
     server_ip = args.serverip   # server_ip from input
     server_port= int(args.port)       # port from input
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Defines socket with family and type
@@ -340,29 +332,3 @@ elif args.client:   # If client flag is chosen
 
 # TODO:
     # IMPLEMENT PARALLEL MODE
-
-    # MAYBE DO THE FLAG COMBINATION ERROR HANDLING
-
-
-
-""" 
-# NEVERMIND THIS!!!!!!!!!!!!!11
-# ERROR HANDLING FOR WRONG FLAG AND MODE COMBINATIONS
-
-########## SERVER MODE OG BIND GIR FLAG COMBO ERROR NÅ!!!!!!!!!!!!!!!!!!!!!!
-if args.serverip != '127.0.0.1':
-    client_serverip = args.serverip
-if args.bind != '127.0.0.1':
-    bind = args.bind
-if args.time != 25:
-    client_time = args.time
-if args.parallel != 1:
-    parallel = args.parallel
-
-if ((args.client and bind) or (args.server and (client_serverip or client_time or args.interval or parallel or args.num))):
-    parser.print_help()
-    print("\n *****************************************************")
-    print("\n \n [FLAG ERROR] Wrong mode and flag combination! \n \n SEE THE HELP MENU ABOVE FOR FLAGS AND ARGUMENTS")
-    sys.exit()
-
- """
