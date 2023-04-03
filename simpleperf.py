@@ -113,12 +113,13 @@ commonargs.add_argument('-f', '--format', type=str, choices=['B', 'KB', 'MB'], d
 args = parser.parse_args()
 
 # CREATES RESULTS AND PRINT TABLE - Based on what is sent from the server and client functions
-def create_result(mode, addr, start_time, end_time, data):
+# Takes the arguments interval=False to check if it should print interval or just the summary
+def create_result(mode, addr, start_time, interval_start, elapsed_time, data, interval=False):
     ip = addr[0]    # Chooses index 0 and 1 from the address tupple to split ip and port
     port = addr[1]
-    total_time = end_time - start_time  # Calculates total time based on start and end time provided by client/server
-    
-    rate = (data / total_time) * 8 / 1000000 # Calculate rate based on data and time provided. Multiply by 8 to convert to bits pr sec
+    relative_interval_start = interval_start - start_time
+
+    rate = (data / elapsed_time) * 8 / 1000000 # Calculate rate based on data and time provided. Multiply by 8 to convert to bits pr sec
 
     # If/else if to check if the format chosen is MB, KB or B. Then converts the data from byte to the correct format.
     if args.format == 'MB':
@@ -136,14 +137,17 @@ def create_result(mode, addr, start_time, end_time, data):
     else:
         print("Error in creating result: Wrong mode")   # Error in the edge case that there is no mode chosen (won't really happen)
 
+    # String for interval time printing dependent on if summary=True/False
+    if interval:
+        interval_str = f"{round(relative_interval_start, 1)} - {round(relative_interval_start + elapsed_time, 1)}" 
+    else:
+        interval_str = f"0.0 - {round(elapsed_time, 1)}"
+
     # Adds row with all the data provided, with the right rounding and casting of data
-    result_table.add_row([f"{ip}:{port}", f"0.0 - {round(total_time, 1)}", f"{data}{args.format}", f"{round(rate, 2)} Mbps"])
-    # LØKKE HER FOR Å FÅ UT FLERE RESULTATER
-    result_table.add_row(["----------------","---------","--------","----------"])  # Adds a line to split out the summary from all the results
-    # OBS!!! MÅ HA EN SUMMARY PRINT TIL SLUTT - SE OPPGAVE
-    result_table.add_row(["A summary", "will be", "printed", "here soon"])
-    print(result_table) # Prints the table
+    result_table.add_row([f"{ip}:{port}", interval_str, f"{data}{args.format}", f"{round(rate, 2)} Mbps"])
+    print(result_table)
     print("")
+
 
 # FUNCTION FOR HANDLING EACH CLIENT CONNECTING TO THE SERVER
 def handle_client(conn, addr, server_ip, port):
@@ -169,10 +173,10 @@ def handle_client(conn, addr, server_ip, port):
                 recv_bytes += len(data) # Adds the length of the recieved bytes to the variable
 
     end_time = time.time()  # Sets end time
-    conn.close()    # Closes the connection
-    create_result('S', addr, start_time, end_time, recv_bytes)  # Calls the function to create results and send all the data
+    elapsed_time = end_time - start_time
+    create_result('S', addr, start_time, end_time, elapsed_time, recv_bytes, False)  # Calls the function to create results and send all the data
 
-# Function for starting the server
+# FUNCTION FOR STARTING THE SERVER
 def start_server(sock, server_ip, port):
     sock.listen()   # Socket listens for connections
     print(f"{line} \t A simpleperf server is listening on port {port} {line}")
@@ -236,18 +240,35 @@ def start_client(sock, server_ip, port):
         client_addr = (client_ip, client_port)
 
         print(f"Client connected with {server_ip} port {port} \n")
-        start_time = time.time()    # Sets start time
-                        
+        
+        start_time = time.time()    # Sets start time                
         bytes = args.num    # Bytes are the number set in CLI
         total_bytes = 0
+
+        # Declares variables for interval flag:
+        interval = int(args.interval)
+        interval_start = start_time
+        interval_bytes = 0
+
         if bytes != None:    # If there are defined number of bytes to be sent
             total_bytes = bytes # Sets how many bytes from start
             while bytes > 0:    # As long as there are more bytes
+
                 if bytes < 1000:    # If there is less than 1000 bytes
                     sock.send(b"0" * bytes) # Sends bytes as 0 as many times as there are bytes left
-                    bytes = 0
+                    interval_bytes += bytes # Adds to interval_bytes
+                    bytes = 0   # No more bytes
                 sock.send(packet)   # If there are > 1000 bytes, keep sending packets of 1000 bytes.
+                interval_bytes += len(packet)   # Adds bytes to interval bytes
                 bytes -= 1000   # Subtract 1000 bytes from the amount given by user
+
+                current_time = time.time()
+                if interval and current_time - interval_start >= interval:  # If there is set an interval and we hit the interval
+                    elapsed_time = current_time - interval_start
+                    create_result('C', client_addr, start_time, interval_start, elapsed_time, interval_bytes, True)   # Creates result with the interval given
+                    # "Reset" start time and interval bytes
+                    interval_start = current_time
+                    interval_bytes = 0
             end_time = time.time()  # Sets end time when the loop is done
             sock.send(b'BYE')   # Send the BYE message after sending the specified amount of data
             
@@ -259,12 +280,24 @@ def start_client(sock, server_ip, port):
                     remaining_bytes = int((remaining_time * 1000))  # Calculate remaining bytes to send
                     packet = b'0' * remaining_bytes + b'BYE'    # creates a packet of remaining bytes and BYE message
                     sock.send(packet)   # Sends packet before time is up
-                    total_bytes += len(packet)  # Adds lenggth to total bytes
+                    total_bytes += len(packet)  # Adds length to total bytes
+                    interval_bytes += len(packet)   # Adds bytes to the interval_bytes
                     break
+                
                 sock.send(packet)   # Sends packets of 1000 bytes
                 total_bytes += len(packet) # Adds length of packet to the total amount of bytes sent
+                interval_bytes += len(packet)   # Adds bytes to the interval_bytes
 
-        create_result('C', client_addr, start_time, end_time, total_bytes)  # Calls the create result function with the data
+                current_time = time.time()
+                if interval and current_time - interval_start >= interval:  # If there is set an interval and we hit the interval
+                    elapsed_time = current_time - interval_start
+                    create_result('C', client_addr, start_time, interval_start, elapsed_time, interval_bytes, True)   # Creates result with the interval given
+                    # "Reset" start time and interval bytes
+                    interval_start = current_time
+                    interval_bytes = 0
+
+        total_elapsed_time = end_time - start_time
+        create_result('C', client_addr, start_time, total_elapsed_time, start_time, total_bytes)  # Calls the create result function with the data
         server_msg = sock.recv(1024)    # Recives message back from server
         if server_msg == b'ACK:BYE':    # If the server has acknowledged the BYE message
             print("[SUCCESS] Server acknowledged BYE message \n")   # Print message to show that it succeeded
