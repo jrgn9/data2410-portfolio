@@ -117,7 +117,7 @@ args = parser.parse_args()
 def create_result(mode, addr, start_time, interval_start, elapsed_time, data, interval=False):
     ip = addr[0]    # Chooses index 0 and 1 from the address tupple to split ip and port
     port = addr[1]
-    relative_interval_start = interval_start - start_time
+    relative_interval_start = interval_start - start_time   # Sets the start for every interval
 
     rate = (data / elapsed_time) * 8 / 1000000 # Calculate rate based on data and time provided. Multiply by 8 to convert to bits pr sec
 
@@ -137,11 +137,11 @@ def create_result(mode, addr, start_time, interval_start, elapsed_time, data, in
     else:
         print("Error in creating result: Wrong mode")   # Error in the edge case that there is no mode chosen (won't really happen)
 
-    # String for interval time printing dependent on if summary=True/False
+    # String for interval time printing dependent on if interval=True/False
     if interval:
-        interval_str = f"{round(relative_interval_start, 1)} - {round(relative_interval_start + elapsed_time, 1)}" 
+        interval_str = f"{round(relative_interval_start, 1)} - {round(relative_interval_start + elapsed_time, 1)}"  # Prints interval from rel. start to rel. start + elapsed time
     else:
-        interval_str = f"0.0 - {round(elapsed_time, 1)}"
+        interval_str = f"0.0 - {round(elapsed_time, 1)}"    # If there is no interval (just summary), prints 0.0 to elapsed time
 
     # Adds row with all the data provided, with the right rounding and casting of data
     result_table.add_row([f"{ip}:{port}", interval_str, f"{data}{args.format}", "%.2f Mbps" % rate])
@@ -173,8 +173,8 @@ def handle_client(conn, addr, server_ip, port):
                 recv_bytes += len(data) # Adds the length of the recieved bytes to the variable
 
     end_time = time.time()  # Sets end time
-    elapsed_time = end_time - start_time
-    create_result('S', addr, start_time, end_time, elapsed_time, recv_bytes, False)  # Calls the function to create results and send all the data
+    elapsed_time = end_time - start_time    # Sets elapsed time to send to results
+    create_result('S', addr, start_time, end_time, elapsed_time, recv_bytes, False)  # Calls the function to create results and send all the data. False for interval
 
 # FUNCTION FOR STARTING THE SERVER
 def start_server(sock, server_ip, port):
@@ -243,7 +243,7 @@ def start_client(sock, server_ip, port):
         
         start_time = time.time()    # Sets start time                
         bytes = args.num    # Bytes are the number set in CLI
-        total_bytes = 0
+        total_bytes = 0 # declares total bytes
 
         # Declares variables for interval flag:
         interval = int(args.interval)
@@ -264,7 +264,7 @@ def start_client(sock, server_ip, port):
 
                 current_time = time.time()
                 if interval and current_time - interval_start >= interval:  # If there is set an interval and we hit the interval
-                    elapsed_time = current_time - interval_start
+                    elapsed_time = current_time - interval_start    # Elapsed time is the current time subtracted by when the interval started
                     create_result('C', client_addr, start_time, interval_start, elapsed_time, interval_bytes, True)   # Creates result with the interval given
                     # "Reset" start time and interval bytes
                     interval_start = current_time
@@ -290,14 +290,14 @@ def start_client(sock, server_ip, port):
 
                 current_time = time.time()
                 if interval and current_time - interval_start >= interval:  # If there is set an interval and we hit the interval
-                    elapsed_time = current_time - interval_start
+                    elapsed_time = current_time - interval_start    # Elapsed time is the current time subtracted by when the interval started
                     create_result('C', client_addr, start_time, interval_start, elapsed_time, interval_bytes, True)   # Creates result with the interval given
                     # "Reset" start time and interval bytes
                     interval_start = current_time
                     interval_bytes = 0
 
         total_elapsed_time = end_time - start_time
-        create_result('C', client_addr, start_time, interval_start, total_elapsed_time, total_bytes, False)  # Calls the create result function with the data
+        create_result('C', client_addr, start_time, interval_start, total_elapsed_time, total_bytes, False)  # Calls the create result function with the data and no interval (for summary)
         server_msg = sock.recv(1024)    # Recives message back from server
         if server_msg == b'ACK:BYE':    # If the server has acknowledged the BYE message
             print("[SUCCESS] Server acknowledged BYE message \n")   # Print message to show that it succeeded
@@ -339,15 +339,9 @@ elif args.client:   # If client flag is chosen
 
 
 # TODO:
-    # IMPLEMENT INTERVAL MODE
     # IMPLEMENT PARALLEL MODE
-    # CREATE SUMMARY IN THE PRINTED RESULTS
 
     # MAYBE DO THE FLAG COMBINATION ERROR HANDLING
-
-
-
-
 
 
 
