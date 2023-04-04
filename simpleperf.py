@@ -175,6 +175,7 @@ def handle_client(conn, addr, server_ip, port):
     end_time = time.time()  # Sets end time
     elapsed_time = end_time - start_time    # Sets elapsed time to send to results
     create_result('S', addr, start_time, end_time, elapsed_time, recv_bytes, False)  # Calls the function to create results and send all the data. False for interval
+    conn.close()
 
 # FUNCTION FOR STARTING THE SERVER
 def start_server(sock, server_ip, port):
@@ -300,7 +301,7 @@ def start_client(sock, server_ip, port):
                     # "Reset" start time and interval bytes
                     interval_start = current_time
                     interval_bytes = 0
-                    
+
         sock.send(b'BYE')
         total_elapsed_time = end_time - start_time
         create_result('C', client_addr, start_time, interval_start, total_elapsed_time, total_bytes, False)  # Calls the create result function with the data and no interval (for summary)
@@ -308,7 +309,7 @@ def start_client(sock, server_ip, port):
         if server_msg == b'ACK:BYE':    # If the server has acknowledged the BYE message
             print("[SUCCESS] Server acknowledged BYE message \n")   # Print message to show that it succeeded
         else:
-            print("[ERROR] Unexpected response from server")    # Prints error if there is no response/wrong response from server
+            print("[ERROR] Unexpected response from server")    # Prints error if there is no response/wrong response from server.
         sock.close()    # Closes the connection when done
 
 
@@ -337,3 +338,15 @@ elif args.server:   # If server flag is chosen
 elif args.client:   # If client flag is chosen
     print("[CLIENT MODE] Starting...")
     client_mode()   # Starts the client mode
+
+
+
+
+
+
+
+
+
+
+# TODO:
+# KOMMENTER MER UTFYLLENDE HVA HVER FUNKSJON/BIT GJØR
