@@ -280,6 +280,7 @@ def start_client(sock, server_ip, port):
             end_time = start_time + send_time   # Defines end time as the start + time chosen by user
             while time.time() < end_time:   # As long as the current time is less then the end time
                 remaining_time = end_time - time.time() # Defines how long is remaining
+                '''
                 if remaining_time < 0.001:  # Checks if it is enough time to send the last packet
                     remaining_bytes = int((remaining_time * 1000))  # Calculate remaining bytes to send
                     packet = b'0' * remaining_bytes + b'BYE'    # creates a packet of remaining bytes and BYE message
@@ -287,7 +288,7 @@ def start_client(sock, server_ip, port):
                     total_bytes += len(packet)  # Adds length to total bytes
                     interval_bytes += len(packet)   # Adds bytes to the interval_bytes
                     break
-                
+                '''
                 sock.send(packet)   # Sends packets of 1000 bytes
                 total_bytes += len(packet) # Adds length of packet to the total amount of bytes sent
                 interval_bytes += len(packet)   # Adds bytes to the interval_bytes
@@ -299,7 +300,8 @@ def start_client(sock, server_ip, port):
                     # "Reset" start time and interval bytes
                     interval_start = current_time
                     interval_bytes = 0
-
+                    
+        sock.send(b'BYE')
         total_elapsed_time = end_time - start_time
         create_result('C', client_addr, start_time, interval_start, total_elapsed_time, total_bytes, False)  # Calls the create result function with the data and no interval (for summary)
         server_msg = sock.recv(1024)    # Recives message back from server
