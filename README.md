@@ -38,7 +38,7 @@ python simpleperf.py -s
 ```
 python simpleperf.py -c
 ```
-*Will run the client with 127.0.0.1:8088 as server, printing in MB format and run for 25 seconds.*
+*Will run the client with 127.0.0.1:8088 as server, printing in MB format and run for 25 seconds.* 
 
 &nbsp;
 
