@@ -10,6 +10,11 @@ To install via [pip](https://pip.pypa.io/en/stable/installation/):
 python -m pip install -U prettytable
 ```
 
+If **ModuleNotFoundError** try instead to install the tarball prettytable-3.6.0.tar.gz in this repository:
+```
+sudo pip install ./prettytable-3.6.0.tar.gz
+```
+
 ## How to run
 Simpleperf runs in server and client mode. Each mode have different flags you can invoke.
 
