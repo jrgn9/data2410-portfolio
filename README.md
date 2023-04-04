@@ -45,6 +45,8 @@ python simpleperf.py -c
 ## Sources:
 https://docs.python.org/3/library/argparse.html
 
+https://docs.python.org/3/library/re.html
+
 https://github.com/safiqul/2410
 
 https://pypi.org/project/prettytable/
