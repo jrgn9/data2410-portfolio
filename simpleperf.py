@@ -182,18 +182,20 @@ def start_server(sock, server_ip, port):
     sock.listen()   # Socket listens for connections
     print(f"{line} \t A simpleperf server is listening on port {port} {line}")
     
-    sock.settimeout(300)     # Set a timeout of 5 minutes for the server socket
+    #sock.settimeout(300)     # Set a timeout of 5 minutes for the server socket
 
     while True:    # Runs as long as there is a connection
         conn = None  # Initialize conn variable
         try:
             conn, addr = sock.accept()  # Accepts connection for the incoming address
-        except socket.timeout:
-            # If no clients connect in 5 minutes
-            print("[CONNECTION TIMEOUT] Timeout due to inactivity. Closing connections...")
-            if conn:
-                conn.close()
-            sys.exit(0)
+            '''
+            except socket.timeout:
+                # If no clients connect in 5 minutes
+                print("[CONNECTION TIMEOUT] Timeout due to inactivity. Closing connections...")
+                if conn:
+                    conn.close()
+                sys.exit(0)
+            '''
         except KeyboardInterrupt:
             # If the user hits ctrl+c, close the server socket and any open connections
             print("[CLOSING CONNECTIONS] Goodbye!")
