@@ -1,7 +1,9 @@
-# simpleperf is a program based on the iPerf tool for measuring network throughput.
-# This program is a simplified network throughput measurement tool. 
-# simpleperf sends and recieves packet between a client and a server using sockets.
-# It runs in two modes: Server mode and client mode.
+'''
+simpleperf is a program based on the iPerf tool for measuring network throughput.
+This program is a simplified network throughput measurement tool. 
+simpleperf sends and recieves packet between a client and a server using sockets.
+It runs in two modes: Server mode and client mode. It has different flags for extra functionality.
+'''
 
 # Different module imports used in this program
 import argparse # argparse is used for a user friendly command-line interface. Here the user can give arguments when running the program
