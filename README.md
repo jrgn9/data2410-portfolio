@@ -42,7 +42,35 @@ python simpleperf.py -c
 
 &nbsp;
 
+### **Table below lists all the available options that you can use to invoke the server:**
+
+| **flag** | **long flag** | **input**   | **type**  | **description**                                                                                                                                                                                       |
+|:--------:|:-------------:|:-----------:|:---------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| -s       | --server      | X           | (boolean) | enable the server mode                                                                                                                                                                                |
+| -b       | --bind        | ip adress   | string    | allows to select the ip address of the server’s interface where the client should connect - use a default value if it’s not provided. It must be in the dotted decimal notation format, e.g. 10.0.0.2 |
+| -p       | --port        | port number | integer   | allows to use select port number on which the server should listen; the port must be an integer and in the range [1024, 65535], default: 8088                                                         |
+| -f       | --format      | MB          | string    | allows you to choose the format of the summary of results - it should be either in B, KB or MB, default=MB)   
+
+&nbsp;
+
+### **Table below lists all the available options that you can use to invoke the client:**
+
+| flag | long flag  | input       | type      | description                                                                                                                                                                                                                          |
+|------|------------|-------------|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -c   | --client   | X           | (boolean) | enable the client mode                                                                                                                                                                                                               |
+| -I   | --serverip | ip adress   | string    | allows to select the ip address of the server - use a default value if it’s not provided. It must be in the dotted decimal notation format, e.g. 10.0.0.2                                                                            |
+| -p   | --port     | port number | integer   | allows to use select port number on which the server should listen; the port must be an integer and in the range [1024, 65535], default: 8088                                                                                        |
+| -t   | --time     | seconds     | integer   | the total duration in seconds for which data should be generated, also sent to the server (if it is set with -t flag at the client side) and must be > 0. NOTE: If you do not use -t flag, your experiment should run for 25 seconds |
+| -f   | --format   | MB          | string    | allows you to choose the format of the summary of results - it should be either in B, KB or MB, default=MB)                                                                                                                          |
+| -i   | --interval | z           | integer   | print statistics per z second                                                                                                                                                                                                        |
+| -P   | --parallel | no_of_conn  | integer   | creates parallel connections to connect to the server and send data - it must be 1 and the max value should be 5 - default:1                                                                                                         |
+| -n   | --num      | no_of_bytes | string    | transfer number of bytes specfied by -n flag, it should be either in B, KB or MB                                                                                                                                                     |
+
+&nbsp;
+
 ## Sources:
+Sources used in this code. Most of it are python documentation and code from lecturer.
+
 https://docs.python.org/3/library/argparse.html
 
 https://docs.python.org/3/library/re.html
