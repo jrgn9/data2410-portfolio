@@ -18,9 +18,11 @@ from prettytable import PrettyTable # Table formating library. Must be installed
 # Used to formating, creating lines for print messages
 line = "\n" + "-" * 65 + "\n"
 
-# ERROR HANDLING: FUNCTIONS TO CHECK INPUT VALUES
-
-# Uses ipaddress import to check if the address is a valid ip address
+'''
+Error handling for ip addresses. Uses the Uses ipaddress import to check if the address is a valid ip address.
+The imported function gives a ValueError if the provided ip address is not a valid IPv4 or IPv6 address.
+Returns the ip address if it passes the check
+'''
 def check_ip(ip_address):
     try:    # This imported function uses ip_address as an argument
         valid = ipaddress.ip_address(ip_address)
@@ -30,7 +32,10 @@ def check_ip(ip_address):
     else:   # If there are no ValueError:
         return ip_address
 
-# Checks if a port is between 1024 and 65535
+'''
+Error handling for port. Checks if the port can be casted to an integer. Then it checks if the value is
+between 1024 and 65535 which is the permitted range. Returns the port if it passes the check.
+'''
 def check_port(port):
     try:        # Tries to cast the port to int
         value = int(port)
@@ -44,7 +49,11 @@ def check_port(port):
             print("[VALUE ERROR] Expected port between 1024 and 65535")
             raise argparse.ArgumentError("")
 
-# Check that the argument is an int and a positive number
+'''
+Checks that the argument can be casted to an integer and that the value is positive.
+This function is used by time and interval, which requires a positive integer.
+Returns the number if it is a positive integer.
+'''
 def check_positive(num):
     try:
         value = int(num)    # Tries to cast the number to an int
@@ -57,7 +66,12 @@ def check_positive(num):
             print("[VALUE ERROR] Expected a positive integer")
             raise argparse.ArgumentError("")
 
-# Checks amount of bytes the user specifies by the -n flag. Strips number from byte type
+'''
+Error handling for the --num flag. The flag is taking both a number and format as an argument.
+First this function tries to split number and letters with regex, then checks if the number is
+an integer. It checks if the format given are B, KB or MB and if not gives an error message to the user.
+Returns the value from the user as bytes.
+'''
 def check_num(bytes):
     try:
         byte_type = re.sub('[0-9]','', bytes)    # Strips the input for numbers
@@ -78,9 +92,12 @@ def check_num(bytes):
             print("[VALUE ERROR] Error in number of bytes. it should be either in B, KB or MB. e.g. 1MB")
             raise argparse.ArgumentError("")
 
-
-# ARGPARSE - A USER FRIENDLY CLI FOR USER ARGUMENTS
-
+'''
+ARGPARSE:
+An user friendly CLI for user arguments. It is a command-line parsing library that gives instruction to the user,
+lets the user choose different arguments and makes it easy to create limitations.
+Used here to create a help menu, set flags, instructions, arguments and restrictions. Returns arguments to be used in the code.
+'''
 # argparse parser object with a description of what this program do
 parser = argparse.ArgumentParser(
     prog="simpleperf",
@@ -114,8 +131,15 @@ commonargs.add_argument('-f', '--format', type=str, choices=['B', 'KB', 'MB'], d
 # Variable for the user argument inputs
 args = parser.parse_args()
 
-# CREATES RESULTS AND PRINT TABLE - Based on what is sent from the server and client functions
-# Takes the arguments interval=False to check if it should print interval or just the summary
+
+'''
+CREATE RESULTS:
+Function for creating print message with results. Uses the PrettyTable library to format the results in tables.
+The function takes server/client mode, ip and port, start time, interval start (if interval is set), elapsed time, data and 
+a boolean for if there are interval set or not. If there is not an interval set, it will print the summary.
+First finds the rate by using data and elapsed time. Checks which format is set. Then creates a PrettyTable, checks which mode is
+set and creates a header row based on that. Checks if there is an interval set, and adds results to the row accordingly. 
+'''
 def create_result(mode, addr, start_time, interval_start, elapsed_time, data, interval=False):
     ip = addr[0]    # Chooses index 0 and 1 from the address tupple to split ip and port
     port = addr[1]
@@ -150,8 +174,13 @@ def create_result(mode, addr, start_time, interval_start, elapsed_time, data, in
     print(result_table)
     print("")
 
-
-# FUNCTION FOR HANDLING EACH CLIENT CONNECTING TO THE SERVER
+'''
+HANDLE CLIENTS:
+A function for handling each client connecting to the server. Function called from the start_server function.
+Takes socket connection, client address, server ip and server port as arguments.
+In an infinite while loop it tries to receive data from client. Keeps receiving data and adds them in a variable.
+Checks if there are no data or a BYE message and closes connection. Then sends all the data to create_results.
+'''
 def handle_client(conn, addr, server_ip, port):
     print(f"A simpleperf client with <{addr[0]}:{addr[1]}> is connected with <{server_ip}:{port}> \n")
     start_time = time.time()    # The start time for the connection
@@ -162,7 +191,7 @@ def handle_client(conn, addr, server_ip, port):
         try:    # Tries to recive data from client
             data = conn.recv(1000)  # Sets data as recieved data from client
         except:
-            print("[ERROR] Could not recive data from client. Connection closed")
+            print("[ERROR] Could not receive data from client. Connection closed")
             conn.close()
         else:   # If there are no errors
             if not data:    # Stops if there are no more data
@@ -179,7 +208,11 @@ def handle_client(conn, addr, server_ip, port):
     create_result('S', addr, start_time, end_time, elapsed_time, recv_bytes, False)  # Calls the function to create results and send all the data. False for interval
     conn.close()
 
-# FUNCTION FOR STARTING THE SERVER
+'''
+START SERVER:
+A function for starting the server. Listens for connections. If there are a connection, it starts a new thread and sends it to
+the handle_client function. Checks if there are a connection and closes if there are none.
+'''
 def start_server(sock, server_ip, port):
     sock.listen()   # Socket listens for connections
     print(f"{line} \t A simpleperf server is listening on port {port} {line}")
@@ -203,8 +236,11 @@ def start_server(sock, server_ip, port):
             thread.start()
             print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1} \n") # Prints how many active connections there are. -1 because listen always run as a thread.
 
-
-# FUNCTION FOR HANDLING THE SERVER MODE
+'''
+SERVER MODE:
+A function for handling the server mode. If the mode is invoked it gets the address from the user, creates a socket 
+and sends it to the start_server function.
+'''
 def server_mode():
     port = int(args.port)    # port from input
     server_ip = args.bind   #   server_ip from input
@@ -215,8 +251,12 @@ def server_mode():
 
     start_server(sock, server_ip, port)  # Starts the server when invoked
 
-
-# FUNCTION FOR STARTING THE CLIENT
+'''
+START CLIENT:
+A function for starting (and running) the client. Takes socket and address as arguments.
+Tries to connect to the server. Then checks if there is set an interval and handles that accordingly.
+Checks if there is selected number of bytes or time, then runs a loop handling that.
+'''
 def start_client(sock, server_ip, port):
     server_addr = (server_ip, port)
     send_time = int(args.time)            # Defined time as the time from user input
@@ -248,6 +288,10 @@ def start_client(sock, server_ip, port):
         interval_start = start_time
         interval_bytes = 0
 
+        '''
+        NUMBER OF BYTES: 
+        If there are defined number of bytes with the -n flag
+        '''  
         # IF THERE ARE DEFINED BYTES WITH --NUM
         if bytes != None:
             total_bytes = bytes # Sets how many bytes from start
@@ -261,6 +305,10 @@ def start_client(sock, server_ip, port):
                 interval_bytes += len(packet)   # Adds bytes to interval bytes
                 bytes -= 1000   # Subtract 1000 bytes from the amount given by user
 
+                '''
+                INTERVAL FLAG:
+                If there is set an interval for printing results, it will keep sending data to the create_result function
+                '''
                 current_time = time.time()
                 if interval and current_time - interval_start >= interval:  # If there is set an interval and we hit the interval
                     elapsed_time = current_time - interval_start    # Elapsed time is the current time subtracted by when the interval started
@@ -271,7 +319,11 @@ def start_client(sock, server_ip, port):
             end_time = time.time()  # Sets end time when the loop is done
             sock.send(b'BYE')   # Send the BYE message after sending the specified amount of data
         
-        # IF THERE ARE NOT DEFINED BYTES - EITHER DEFAULT OR TIME FLAG
+            '''
+        TIME MODE: 
+        If bytes (num) are not defined, it will either be default (25 sec) or defined by the time flag.
+        A while loop that runs as long as the current time is less then the defined end time.
+        '''
         else:
             end_time = start_time + send_time   # Defines end time as the start + time chosen by user
             while time.time() < end_time:   # As long as the current time is less then the end time
@@ -280,6 +332,10 @@ def start_client(sock, server_ip, port):
                 total_bytes += len(packet) # Adds length of packet to the total amount of bytes sent
                 interval_bytes += len(packet)   # Adds bytes to the interval_bytes
 
+                '''
+                INTERVAL FLAG:
+                If there is set an interval for printing results, it will keep sending data to the create_result function
+                '''
                 current_time = time.time()
                 if interval and current_time - interval_start >= interval:  # If there is set an interval and we hit the interval
                     elapsed_time = current_time - interval_start    # Elapsed time is the current time subtracted by when the interval started
@@ -288,7 +344,10 @@ def start_client(sock, server_ip, port):
                     interval_start = current_time
                     interval_bytes = 0
         
-        # After num/time loops are done:
+        ''' 
+        After the num or time loop are finished, the client sends BYE, sends all the data to the create_result function,
+        then checks for acknowledgement from the server 
+        '''
         sock.send(b'BYE')   # Sends BYE message
         total_elapsed_time = end_time - start_time
         create_result('C', client_addr, start_time, interval_start, total_elapsed_time, total_bytes, False)  # Calls the create result function with the data and no interval (for summary)
@@ -299,8 +358,11 @@ def start_client(sock, server_ip, port):
             print("[ERROR] Unexpected response from server")    # Prints error if there is no response/wrong response from server.
         sock.close()    # Closes the connection when done
 
-
-# FUNCTION FOR HANDLING THE CLIENT MODE
+'''
+CLIENT MODE:
+A function for handling the client mode. If the mode is invoked it gets the address from the user. Checks if there is set a parallel flag,
+then starts a new thread for each client set as parallel. Creates a socket and sends the socket and address to the start_client function. 
+'''
 def client_mode():
     server_ip = args.serverip   # server_ip from input
     server_port= int(args.port)       # port from input
@@ -311,9 +373,11 @@ def client_mode():
         thread = threading.Thread(target=start_client, args=(sock, server_ip, server_port))  # Starts the client when invoked
         thread.start()
 
-
-# INVOKING CLIENT OR SERVER MODE
-#Gives error if both or none of the mode flags are chosen
+'''
+INVOKING CLIENT OR SERVER MODE:
+Checks if the user has chosen server mode or client mode. Then calls upon their function respectively.
+Gives error message if both or none of the mode flags are chosen.
+'''
 if ((not args.server and not args.client) or (args.server and args.client)):
     parser.print_help() # If not server/client or both are invoked it prints the help screen, then an error message, then exits
     print(line)
@@ -325,15 +389,3 @@ elif args.server:   # If server flag is chosen
 elif args.client:   # If client flag is chosen
     print("[CLIENT MODE] Starting...")
     client_mode()   # Starts the client mode
-
-
-
-
-
-
-
-
-
-
-# TODO:
-# KOMMENTER MER UTFYLLENDE HVA HVER FUNKSJON/BIT GJØR
