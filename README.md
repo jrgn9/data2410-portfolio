@@ -17,7 +17,14 @@ sudo pip install ./prettytable-3.6.0.tar.gz
 
 ### Troubleshooting:
 
-I sometimes had some difficulties running PrettyTable in xterm. For the most part, just importing it with the tarball did the trick. However, sometimes I had to just purge pip completely and start over. I don't know if it works best to install pip and the library right in xterm or in bash terminal, but I would try both approaches if it doesn't work. I would also check if there are a more recent version than 3.6.0 and download a new tarball if it is giving you trouble. After some purging and cursing it have always worked for me.
+I sometimes had some difficulties running PrettyTable in xterm. For the most part, just importing it with the tarball did the trick. However, sometimes I had to just purge pip completely and start over.
+
+```
+sudo apt-get --purge autoremove python3-pip
+sudo apt-get update && sudo apt-get install python3-pip
+```
+
+ I don't know if it works best to install pip and the library right in xterm or in bash terminal, but I would try both approaches if it doesn't work. I would also check if there are a more recent version than 3.6.0 and download a new tarball if it is giving you trouble. After some purging and cursing it have always worked for me.
 
 &nbsp;
 
