@@ -38,15 +38,12 @@ Simpleperf runs in server and client mode. Each mode have different flags you ca
 python simpleperf.py -h
 ```
 
-&nbsp;
-
 **To run server mode with default values:**
 ```
 python simpleperf.py -s
 ```
 *Will run the server on 127.0.0.1:8088 printing in MB format.* 
 
-&nbsp;
 
 **To run the client mode with default values:**
 ```
