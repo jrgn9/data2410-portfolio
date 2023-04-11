@@ -55,10 +55,10 @@ python simpleperf.py -c
 
 | **flag** | **long flag** | **input**   | **type**  | **description**                                                                                                                                                                                       |
 |:--------:|:-------------:|:-----------:|:---------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| -s       | --server      | X           | (boolean) | enable the server mode                                                                                                                                                                                |
-| -b       | --bind        | ip adress   | string    | allows to select the ip address of the server’s interface where the client should connect - use a default value if it’s not provided. It must be in the dotted decimal notation format, e.g. 10.0.0.2 |
+| -s       | --server      | X           | boolean | enable the server mode                                                                                                                                                                                |
+| -b       | --bind        | ip address   | string    | allows to select the ip address of the server’s interface where the client should connect. It must be in the dotted decimal notation format, e.g. 10.0.0.2. Default value if no address is provided: 127.0.0.1 |
 | -p       | --port        | port number | integer   | allows to use select port number on which the server should listen; the port must be an integer and in the range [1024, 65535], default: 8088                                                         |
-| -f       | --format      | MB          | string    | allows you to choose the format of the summary of results - it should be either in B, KB or MB, default=MB)   
+| -f       | --format      | data type          | string    | allows you to choose the format of the summary of results - it must be either in B, KB or MB. default: MB   
 
 &nbsp;
 
@@ -66,14 +66,14 @@ python simpleperf.py -c
 
 | flag | long flag  | input       | type      | description                                                                                                                                                                                                                          |
 |------|------------|-------------|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| -c   | --client   | X           | (boolean) | enable the client mode                                                                                                                                                                                                               |
-| -I   | --serverip | ip adress   | string    | allows to select the ip address of the server - use a default value if it’s not provided. It must be in the dotted decimal notation format, e.g. 10.0.0.2                                                                            |
+| -c   | --client   | X           | boolean | enable the client mode                                                                                                                                                                                                               |
+| -I   | --serverip | ip adress   | string    | allows to select the ip address of the server. It must be in the dotted decimal notation format, e.g. 10.0.0.2. Default value if no address is provided: 127.0.0.1                                                                            |
 | -p   | --port     | port number | integer   | allows to use select port number on which the server should listen; the port must be an integer and in the range [1024, 65535], default: 8088                                                                                        |
-| -t   | --time     | seconds     | integer   | the total duration in seconds for which data should be generated, also sent to the server (if it is set with -t flag at the client side) and must be > 0. NOTE: If you do not use -t flag, your experiment should run for 25 seconds |
-| -f   | --format   | MB          | string    | allows you to choose the format of the summary of results - it should be either in B, KB or MB, default=MB)                                                                                                                          |
-| -i   | --interval | z           | integer   | print statistics per z second                                                                                                                                                                                                        |
-| -P   | --parallel | no_of_conn  | integer   | creates parallel connections to connect to the server and send data - it must be 1 and the max value should be 5 - default:1                                                                                                         |
-| -n   | --num      | no_of_bytes | string    | transfer number of bytes specfied by -n flag, it should be either in B, KB or MB                                                                                                                                                     |
+| -t   | --time     | seconds     | integer   | the total duration in seconds for which data should be generated, also sent to the server (if it is set with -t flag at the client side) and must be > 0. If nothing is set, default: 25 seconds |
+| -f   | --format   | Data type         | string    | allows you to choose the format of the summary of results - it must be either in B, KB or MB. Default: MB                                                                                                                          |
+| -i   | --interval | X           | integer   | print statistics per X second                                                                                                                                                                                                        |
+| -P   | --parallel | number of connections  | integer   | creates parallel connections to connect to the server and send data - it must be 1 and the max value is 5 - default:1                                                                                                         |
+| -n   | --num      | number of bytes | string    | transfer number of bytes specified by -n flag, it must be either in B, KB or MB                                                                                                                                                     |
 
 &nbsp;
 
