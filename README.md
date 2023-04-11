@@ -27,8 +27,6 @@ sudo apt-get update && sudo apt-get install python3-pip
 
  I don't know if it works best to install pip and the library right in xterm or in bash terminal, but I would try both approaches if it doesn't work. I would also check if there are a more recent version than 3.6.0 and download a new tarball if it is giving you trouble. After some purging and cursing it have always worked for me.
 
-&nbsp;
-
 ## How to run
 Simpleperf runs in server and client mode. Each mode have different flags you can invoke.
 
