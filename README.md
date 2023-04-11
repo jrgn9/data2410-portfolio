@@ -14,6 +14,7 @@ If **ModuleNotFoundError** try instead to install the tarball prettytable-3.6.0.
 ```
 sudo pip install ./prettytable-3.6.0.tar.gz
 ```
+*You might have to run with --force-reinstall for this to work*
 
 ### Troubleshooting:
 
