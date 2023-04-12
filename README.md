@@ -25,7 +25,9 @@ sudo apt-get --purge autoremove python3-pip
 sudo apt-get update && sudo apt-get install python3-pip
 ```
 
- I don't know if it works best to install pip and the library right in xterm or in bash terminal, but I would try both approaches if it doesn't work. I would also check if there are a more recent version than 3.6.0 and download a new tarball if it is giving you trouble. After some purging and cursing it have always worked for me.
+ I don't know if it works best to install pip and the library right in xterm or in bash terminal, but I would try both approaches if it doesn't work. I would also check if there are a more recent version than 3.6.0 and download a new tarball if it is giving you trouble. Some of my fellow students even reported that downloading [earlier versions](https://pypi.org/project/prettytable/#history) worked.
+ 
+ After some purging and cursing it have always worked for me though. Good luck!
 
 ## How to run
 Simpleperf runs in server and client mode. Each mode have different flags you can invoke.
