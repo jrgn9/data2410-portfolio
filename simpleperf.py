@@ -397,3 +397,4 @@ elif args.server:   # If server flag is chosen
 elif args.client:   # If client flag is chosen
     print("[CLIENT MODE] Starting...")
     client_mode()   # Starts the client mode
+    
