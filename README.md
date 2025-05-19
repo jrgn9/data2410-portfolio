@@ -1,5 +1,9 @@
 # SIMPLEPERF
 
+> ## ⚠️ Migrated to Codeberg
+>
+> This project has [migrated to Codeberg](https://codeberg.org/jrgn9/data2410-portfolio).
+
 Simpleperf is a program based on the iPerf tool for measuring network throughput. This program is a simplified network throughput measurement tool. simpleperf sends and recieves packets of 1000 bytes between a client and a server using sockets. It runs in two modes: Server mode and client mode.
 
 ## Dependencies
